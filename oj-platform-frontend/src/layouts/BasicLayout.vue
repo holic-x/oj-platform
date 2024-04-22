@@ -5,7 +5,7 @@
         <GlobalHeader></GlobalHeader>
       </a-layout-header>
       <a-layout-content class="content">
-        <!--        <router-view />-->
+        <router-view />
         <h1>页面定义</h1>
       </a-layout-content>
       <a-layout-footer class="footer">
