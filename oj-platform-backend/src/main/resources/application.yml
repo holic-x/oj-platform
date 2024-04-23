@@ -101,3 +101,4 @@ knife4j:
           - com.noob.module.base.controller
           - com.noob.module.template.controller
           - com.noob.module.dataInfo.controller
+          - com.noob.module.oj.controller
