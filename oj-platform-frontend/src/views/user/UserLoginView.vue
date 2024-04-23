@@ -54,17 +54,17 @@ const handleSubmit = async () => {
   if (res.code === 0) {
     await store.dispatch("user/getLoginUser");
 
-    router.push({
-      path: "/",
-      replace: true,
-    });
+    // router.push({
+    //   path: "/",
+    //   replace: true,
+    // });
 
-    // setTimeout(() => {
-    //   router.push({
-    //     path: "/",
-    //     replace: true,
-    //   });
-    // }, 3000);
+    setTimeout(() => {
+      router.push({
+        path: "/",
+        replace: true,
+      });
+    }, 3000);
   } else {
     message.error("登陆失败，" + res.message);
   }

@@ -4,7 +4,7 @@ import ACCESS_ENUM from "@/access/accessEnum";
 import checkAccess from "@/access/checkAccess";
 
 router.beforeEach(async (to, from, next) => {
-  console.log("登陆用户信息", store.state.user.loginUser);
+  console.log("权限拦截校验：校验当前登陆用户信息", store.state.user.loginUser);
   const loginUser = store.state.user.loginUser;
   // 如果之前没登陆过，自动登陆
   if (!loginUser || !loginUser.userRole) {
