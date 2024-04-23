@@ -56,12 +56,14 @@ router.afterEach((to, from, failure) => {
 
 // 获取全局变量
 const store = useStore();
+/*
 setTimeout(() => {
   store.dispatch("user/getLoginUser", {
     userName: "哈哈",
     userRole: accessEnum.ADMIN,
   });
 }, 3000);
+ */
 
 // 定义显示在菜单的路由数组（过滤隐藏的路由）：computed 动态计算，会联动变更visibleRoutes的值
 const visibleRoutes = computed(() => {
