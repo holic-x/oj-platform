@@ -20,6 +20,7 @@ import accessEnum from "@/access/accessEnum";
 const router = useRouter();
 const store = useStore();
 
+/* ----- 迁移 ------ 在access/index.ts中配置
 // 权限拦截（路由点击的时候触发校验，如果不满足则进行拦截）
 router.beforeEach((to, from, next) => {
   console.log(to);
@@ -34,6 +35,7 @@ router.beforeEach((to, from, next) => {
   }
   next();
 });
+*/
 
 const doInit = () => {
   console.log("hello 欢迎来到我的OJ项目");

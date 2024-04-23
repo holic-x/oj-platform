@@ -2,7 +2,6 @@
 import { StoreOptions } from "vuex";
 import accessEnum from "@/access/accessEnum";
 import { UserControllerService } from "../../generated";
-import ACCESS_ENUM from "@/access/accessEnum";
 
 export default {
   namespaced: true,
@@ -20,7 +19,7 @@ export default {
       } else {
         commit("updateUser", {
           ...state.loginUser,
-          userRole: ACCESS_ENUM.NOT_LOGIN,
+          userRole: accessEnum.NOT_LOGIN,
         });
       }
       // 根据传递的值设置登录用户信息（{userName: "哈哈",userRole: accessEnum.ADMIN}）
