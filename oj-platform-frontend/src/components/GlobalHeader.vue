@@ -17,9 +17,9 @@
               <div class="title">Noob OJ</div>
             </div>
           </a-menu-item>
-          <a-menu-item v-for="item in visibleRoutes" :key="item.path">{{
-            item.name
-          }}</a-menu-item>
+          <a-menu-item v-for="item in visibleRoutes" :key="item.path"
+            >{{ item.name }}
+          </a-menu-item>
         </a-menu>
       </div>
     </a-col>
@@ -35,8 +35,10 @@
 import { routes } from "../router/routes";
 
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useStore } from "vuex";
+import checkAccess from "@/access/checkAccess";
+import accessEnum from "@/access/accessEnum";
 
 const router = useRouter();
 const doMenuClick = (key: string) => {
@@ -58,16 +60,25 @@ const store = useStore();
 setTimeout(() => {
   store.dispatch("user/getLoginUser", {
     userName: "哈哈",
+    userRole: accessEnum.ADMIN,
   });
 }, 3000);
 */
 
-// 显示在菜单的路由数组
-const visibleRoutes = routes.filter((item, index) => {
-  if (item.meta?.hideInMenu) {
-    return false;
-  }
-  return true;
+// 定义显示在菜单的路由数组（过滤隐藏的路由）：computed 动态计算，会联动变更visibleRoutes的值
+const visibleRoutes = computed(() => {
+  return routes.filter((item, index) => {
+    if (item.meta?.hideInMenu) {
+      return false;
+    }
+    // 根据权限过滤菜单
+    if (
+      !checkAccess(store.state.user.loginUser, item?.meta?.access as string)
+    ) {
+      return false;
+    }
+    return true;
+  });
 });
 </script>
 
