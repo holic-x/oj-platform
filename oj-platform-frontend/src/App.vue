@@ -1,6 +1,11 @@
 <template>
   <div id="app">
-    <BasicLayout />
+    <template v-if="route.path.startsWith('/user')">
+      <router-view />
+    </template>
+    <template v-else>
+      <BasicLayout />
+    </template>
   </div>
 </template>
 
@@ -11,7 +16,7 @@
 
 <script setup lang="ts">
 import BasicLayout from "@/layouts/BasicLayout.vue";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { useStore } from "vuex";
 import { onMounted } from "vue";
 import accessEnum from "@/access/accessEnum";
@@ -19,6 +24,7 @@ import accessEnum from "@/access/accessEnum";
 // 权限拦截校验
 const router = useRouter();
 const store = useStore();
+const route = useRoute();
 
 /* ----- 迁移 ------ 在access/index.ts中配置
 // 权限拦截（路由点击的时候触发校验，如果不满足则进行拦截）
