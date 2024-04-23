@@ -1,4 +1,4 @@
-package com.noob.module.oj.model.vo;
+package com.noob.module.oj.model.question.vo;
 
 import com.noob.module.template.model.entity.Template;
 import lombok.Data;

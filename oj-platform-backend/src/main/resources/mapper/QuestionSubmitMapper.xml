@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.noob.module.oj.mapper.QuestionSubmitMapper">
 
-    <resultMap id="BaseResultMap" type="com.noob.module.oj.model.entity.QuestionSubmit">
+    <resultMap id="BaseResultMap" type="com.noob.module.oj.model.questionSubmit.entity.QuestionSubmit">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="language" column="language" jdbcType="VARCHAR"/>
         <result property="code" column="code" jdbcType="VARCHAR"/>
@@ -25,4 +25,58 @@
         creater,updater,createTime,updateTime,
         isDelete
     </sql>
+
+
+    <!-- 映射关系定义 -->
+    <resultMap id="getVOMap" type="com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO">
+        <id property="id" column="id" jdbcType="BIGINT"/>
+        <result property="language" column="language" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="judgeInfo" column="judgeInfo" jdbcType="VARCHAR"/>
+        <result property="status" column="status" jdbcType="INTEGER"/>
+        <result property="questionId" column="questionId" jdbcType="BIGINT"/>
+        <result property="creater" column="creater" jdbcType="BIGINT"/>
+        <result property="updater" column="updater" jdbcType="BIGINT"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+
+        <!-- 冗余字段createrName：对应列名为createrName -->
+        <result property="createrName" column="createrName" jdbcType="VARCHAR"/>
+        <result property="updaterName" column="updaterName" jdbcType="VARCHAR"/>
+        <!-- 其他字段映射... -->
+
+    </resultMap>
+
+    <sql id="getVO">
+        select
+            qs.*,
+            cu.userName 'createrName',
+                uu.userName 'updaterName'
+        from question_submit qs
+                 left join user cu on cu.id = qs.creater
+                 left join user uu on uu.id = qs.updater
+        where 1=1
+    </sql>
+
+    <select id="getVOById" resultMap="getVOMap">
+        <include refid="getVO"></include>
+        and qs.id = #{id}
+    </select>
+
+    <select id="getVOByPage" resultMap="getVOMap">
+        <include refid="getVO"></include>
+        <if test="params.language !=null and params.language !=''">
+            and qs.language = #{params.language}
+        </if>
+        <if test="params.code !=null and params.code !=''">
+            and qs.code = #{params.code}
+        </if>
+        <if test="params.status !=null and params.status !=''">
+            and qs.status = #{params.status}
+        </if>
+        <if test="params.questionId !=null and params.questionId !=''">
+            and qs.questionId = #{params.questionId}
+        </if>
+    </select>
 </mapper>

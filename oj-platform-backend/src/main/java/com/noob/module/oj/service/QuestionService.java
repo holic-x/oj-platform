@@ -2,9 +2,9 @@ package com.noob.module.oj.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.noob.module.oj.model.dto.QuestionQueryRequest;
-import com.noob.module.oj.model.entity.Question;
-import com.noob.module.oj.model.vo.QuestionVO;
+import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
+import com.noob.module.oj.model.question.entity.Question;
+import com.noob.module.oj.model.question.vo.QuestionVO;
 
 import javax.servlet.http.HttpServletRequest;
 

@@ -1,4 +1,4 @@
-package com.noob.module.oj.model.dto;
+package com.noob.module.oj.model.question.dto;
 
 import com.noob.framework.common.PageRequest;
 import lombok.Data;

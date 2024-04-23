@@ -1,15 +1,20 @@
-package com.noob.module.oj.model.dto;
+package com.noob.module.oj.model.question.dto;
 
 import lombok.Data;
 
 import java.io.Serializable;
 
 /**
- * 创建请求
+ * 修改请求
  *
  */
 @Data
-public class QuestionAddRequest implements Serializable {
+public class QuestionUpdateRequest implements Serializable {
+
+    /**
+     * id
+     */
+    private Long id;
 
     /**
      * 标题
@@ -60,7 +65,6 @@ public class QuestionAddRequest implements Serializable {
      * 收藏数
      */
     private Integer favourNum;
-
 
     private static final long serialVersionUID = 1L;
 }

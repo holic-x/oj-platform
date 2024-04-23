@@ -2,9 +2,9 @@ package com.noob.module.oj.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.noob.module.oj.model.dto.QuestionQueryRequest;
-import com.noob.module.oj.model.entity.Question;
-import com.noob.module.oj.model.vo.QuestionVO;
+import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
+import com.noob.module.oj.model.question.entity.Question;
+import com.noob.module.oj.model.question.vo.QuestionVO;
 import org.apache.ibatis.annotations.Param;
 import org.apache.poi.ss.formula.functions.T;
 

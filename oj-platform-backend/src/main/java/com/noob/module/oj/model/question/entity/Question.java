@@ -1,4 +1,4 @@
-package com.noob.module.oj.model.entity;
+package com.noob.module.oj.model.question.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
