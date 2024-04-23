@@ -1,25 +1,33 @@
 <template>
-  <div id="globalHeader">
-    <a-menu
-      mode="horizontal"
-      :selectedKeys="selectedKeys"
-      @menu-item-click="doMenuClick"
-    >
-      <a-menu-item
-        key="0"
-        :style="{ padding: 0, marginRight: '38px' }"
-        disabled
-      >
-        <div class="title-bar">
-          <img class="logo" src="../assets/oj-logo.png" />
-          <div class="title">Noob OJ</div>
-        </div>
-      </a-menu-item>
-      <a-menu-item v-for="item in routes" :key="item.path"
-        >{{ item.name }}
-      </a-menu-item>
-    </a-menu>
-  </div>
+  <a-row id="globalHeader" style="margin-bottom: 16px" align="center">
+    <a-col flex="auto">
+      <div>
+        <a-menu
+          mode="horizontal"
+          :selectedKeys="selectedKeys"
+          @menu-item-click="doMenuClick"
+        >
+          <a-menu-item
+            key="0"
+            :style="{ padding: 0, marginRight: '38px' }"
+            disabled
+          >
+            <div class="title-bar">
+              <img class="logo" src="../assets/oj-logo.png" />
+              <div class="title">Noob OJ</div>
+            </div>
+          </a-menu-item>
+          <a-menu-item v-for="item in routes" :key="item.path"
+            >{{ item.name }}
+          </a-menu-item>
+        </a-menu>
+      </div>
+    </a-col>
+    <a-col flex="100px">
+      <!--      <div>{{ store.state.user?.loginUser?.userName }}</div>-->
+      <div>{{ store.state.user?.loginUser?.userName ?? "尚未登录" }}</div>
+    </a-col>
+  </a-row>
 </template>
 
 <!-- 设置setup vue3写法 -->
@@ -28,6 +36,7 @@ import { routes } from "../router/routes";
 
 import { useRouter } from "vue-router";
 import { ref } from "vue";
+import { useStore } from "vuex";
 
 const router = useRouter();
 const doMenuClick = (key: string) => {
@@ -42,6 +51,16 @@ const selectedKeys = ref(["/"]);
 router.afterEach((to, from, failure) => {
   selectedKeys.value = [to.path];
 });
+
+// 获取全局变量
+const store = useStore();
+/*
+setTimeout(() => {
+  store.dispatch("user/getLoginUser", {
+    userName: "哈哈",
+  });
+}, 3000);
+*/
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

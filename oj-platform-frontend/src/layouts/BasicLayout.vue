@@ -19,7 +19,6 @@
 }
 
 #basicLayout .header {
-  background: red;
   margin-bottom: 16px;
 }
 

@@ -16,4 +16,17 @@ export const routes: Array<RouteRecordRaw> = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
   },
+  {
+    path: "/admin",
+    name: "管理员",
+    component: () => import("../views/AdminView.vue"),
+    meta: {
+      access: "canAdmin",
+    },
+  },
+  {
+    path: "/noAuth",
+    name: "无权限访问",
+    component: () => import("../views/NoAuthView.vue"),
+  },
 ];
