@@ -29,4 +29,12 @@ export const routes: Array<RouteRecordRaw> = [
     name: "无权限访问",
     component: () => import("../views/NoAuthView.vue"),
   },
+  {
+    path: "/hideMenu",
+    name: "隐藏页面",
+    meta: {
+      hideInMenu: true,
+    },
+    component: () => import("../views/HideView.vue"),
+  },
 ];

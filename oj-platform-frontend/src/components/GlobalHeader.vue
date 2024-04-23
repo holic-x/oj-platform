@@ -17,9 +17,9 @@
               <div class="title">Noob OJ</div>
             </div>
           </a-menu-item>
-          <a-menu-item v-for="item in routes" :key="item.path"
-            >{{ item.name }}
-          </a-menu-item>
+          <a-menu-item v-for="item in visibleRoutes" :key="item.path">{{
+            item.name
+          }}</a-menu-item>
         </a-menu>
       </div>
     </a-col>
@@ -61,6 +61,14 @@ setTimeout(() => {
   });
 }, 3000);
 */
+
+// 显示在菜单的路由数组
+const visibleRoutes = routes.filter((item, index) => {
+  if (item.meta?.hideInMenu) {
+    return false;
+  }
+  return true;
+});
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
