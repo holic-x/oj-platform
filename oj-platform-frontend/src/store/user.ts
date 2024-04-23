@@ -1,20 +1,30 @@
 // initial state
 import { StoreOptions } from "vuex";
 import accessEnum from "@/access/accessEnum";
+import { UserControllerService } from "../../generated";
+import ACCESS_ENUM from "@/access/accessEnum";
 
 export default {
   namespaced: true,
   state: () => ({
     loginUser: {
       userName: "未登录",
-      userRole: accessEnum.NOT_LOGIN,
     },
   }),
   actions: {
     async getLoginUser({ commit, state }, payload) {
-      // todo 调整为远程登录获取用户信息并设置全局参数
+      // 从远程请求获取登录信息
+      const res = await UserControllerService.getLoginUserUsingGet();
+      if (res === 0) {
+        commit("updateUser", res.data);
+      } else {
+        commit("updateUser", {
+          ...state.loginUser,
+          userRole: ACCESS_ENUM.NOT_LOGIN,
+        });
+      }
       // 根据传递的值设置登录用户信息（{userName: "哈哈",userRole: accessEnum.ADMIN}）
-      commit("updateUser", payload);
+      // commit("updateUser", payload);
     },
   },
   mutations: {
