@@ -15,6 +15,7 @@
       >
         <a-input v-model="form.userName" placeholder="请输入昵称" />
       </a-form-item>
+
       <a-form-item
         :rules="[
           { required: true, message: '账号不能为空' },

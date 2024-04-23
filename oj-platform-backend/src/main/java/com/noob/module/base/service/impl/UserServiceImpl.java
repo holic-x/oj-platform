@@ -42,9 +42,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public static final String SALT = "noob";
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userName,String userAccount, String userPassword, String checkPassword) {
         // 1. 校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(userName,userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
         }
         if (userAccount.length() < 4) {
@@ -69,6 +69,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
             // 3. 插入数据
             User user = new User();
+            user.setUserName(userName);
             user.setUserAccount(userAccount);
             user.setUserPassword(encryptPassword);
             boolean saveResult = this.save(user);

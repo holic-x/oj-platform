@@ -53,18 +53,10 @@ const handleSubmit = async () => {
   // 登录成功，跳转到主页
   if (res.code === 0) {
     await store.dispatch("user/getLoginUser");
-
-    // router.push({
-    //   path: "/",
-    //   replace: true,
-    // });
-
-    setTimeout(() => {
-      router.push({
-        path: "/",
-        replace: true,
-      });
-    }, 3000);
+    router.push({
+      path: "/",
+      replace: true,
+    });
   } else {
     message.error("登陆失败，" + res.message);
   }

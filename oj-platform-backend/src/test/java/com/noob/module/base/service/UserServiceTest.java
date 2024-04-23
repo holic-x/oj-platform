@@ -19,14 +19,15 @@ public class UserServiceTest {
 
     @Test
     void userRegister() {
+        String userName = "noob";
         String userAccount = "noob";
         String userPassword = "";
         String checkPassword = "123456";
         try {
-            long result = userService.userRegister(userAccount, userPassword, checkPassword);
+            long result = userService.userRegister(userName,userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
             userAccount = "noob";
-            result = userService.userRegister(userAccount, userPassword, checkPassword);
+            result = userService.userRegister(userName,userAccount, userPassword, checkPassword);
             Assertions.assertEquals(-1, result);
         } catch (Exception e) {
 

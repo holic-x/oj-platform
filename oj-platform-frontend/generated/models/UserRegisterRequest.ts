@@ -3,6 +3,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export type UserRegisterRequest = {
+  userName?: string;
   checkPassword?: string;
   userAccount?: string;
   userPassword?: string;
