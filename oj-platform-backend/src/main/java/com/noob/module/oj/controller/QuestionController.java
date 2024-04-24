@@ -2,6 +2,7 @@ package com.noob.module.oj.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.noob.framework.annotation.AuthCheck;
 import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
@@ -9,9 +10,7 @@ import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
 import com.noob.module.base.model.entity.User;
 import com.noob.module.base.service.UserService;
-import com.noob.module.oj.model.question.dto.QuestionAddRequest;
-import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
-import com.noob.module.oj.model.question.dto.QuestionUpdateRequest;
+import com.noob.module.oj.model.question.dto.*;
 import com.noob.module.oj.model.question.entity.Question;
 import com.noob.module.oj.model.question.vo.QuestionVO;
 import com.noob.module.oj.service.QuestionService;
@@ -38,6 +37,8 @@ public class QuestionController {
     @Resource
     private UserService userService;
 
+    private final static Gson GSON = new Gson();
+
     // region 增删改查
     /**
      * 创建
@@ -53,14 +54,37 @@ public class QuestionController {
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
 
-        // 设置状态
-        questionService.validQuestion(question, true);
 
         User loginUser = userService.getLoginUser(request);
         question.setCreater(loginUser.getId());
         question.setUpdater(loginUser.getId());
         question.setCreateTime(new Date());
         question.setUpdateTime(new Date());
+
+        // 设置标签
+        List<String> tags = questionAddRequest.getTags();
+        if (tags != null) {
+            question.setTags(GSON.toJson(tags));
+        }
+
+        // 设置测试用例
+        List<JudgeCase> judgeCase = questionAddRequest.getJudgeCase();
+        if (judgeCase != null) {
+            question.setJudgeCase(GSON.toJson(judgeCase));
+        }
+
+        // 设置题目配置
+        JudgeConfig judgeConfig = questionAddRequest.getJudgeConfig();
+        if (judgeConfig != null) {
+            question.setJudgeConfig(GSON.toJson(judgeConfig));
+        }
+
+        question.setFavourNum(0);
+        question.setThumbNum(0);
+
+
+        // 校验问题信息
+        questionService.validQuestion(question, true);
 
         // 新增
         boolean result = questionService.save(question);
@@ -116,6 +140,31 @@ public class QuestionController {
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
+
+
+        // 更新问题信息
+        List<String> tags = questionUpdateRequest.getTags();
+        if (tags != null) {
+            question.setTags(GSON.toJson(tags));
+        }
+
+        // 设置测试用例
+        List<JudgeCase> judgeCase = questionUpdateRequest.getJudgeCase();
+        if (judgeCase != null) {
+            question.setJudgeCase(GSON.toJson(judgeCase));
+        }
+
+        // 设置题目配置
+        JudgeConfig judgeConfig = questionUpdateRequest.getJudgeConfig();
+        if (judgeConfig != null) {
+            question.setJudgeConfig(GSON.toJson(judgeConfig));
+        }
+
+
+        // 校验问题信息
+        questionService.validQuestion(question, false);
+
+        // 执行修改操作
         boolean result = questionService.updateById(question);
         return ResultUtils.success(result);
     }

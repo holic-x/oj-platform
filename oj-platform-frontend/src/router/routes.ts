@@ -78,4 +78,19 @@ export const routes: Array<RouteRecordRaw> = [
     name: "编辑器示例",
     component: () => import("../views/ExampleView.vue"),
   },
+  {
+    path: "/add/question",
+    name: "创建题目",
+    component: () => import("../views/question/AddQuestionView.vue"),
+  },
+  {
+    path: "/manage/question",
+    name: "管理题目",
+    component: () => import("../views/question/ManageQuestion.vue"),
+  },
+  {
+    path: "/update/question",
+    name: "更新题目",
+    component: () => import("../views/question/AddQuestionView.vue"),
+  },
 ];

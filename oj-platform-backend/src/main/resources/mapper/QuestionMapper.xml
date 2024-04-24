@@ -67,7 +67,7 @@
         from question q
         left join user cu on cu.id = q.creater
         left join user uu on uu.id = q.updater
-        where 1=1
+        where 1=1 and q.isDelete = 0
     </sql>
 
     <select id="getVOById" resultMap="getVOMap">

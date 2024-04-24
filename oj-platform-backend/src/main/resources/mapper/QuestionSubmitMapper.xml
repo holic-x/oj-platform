@@ -56,7 +56,7 @@
         from question_submit qs
                  left join user cu on cu.id = qs.creater
                  left join user uu on uu.id = qs.updater
-        where 1=1
+        where 1=1 and qs.isDelete = 0
     </sql>
 
     <select id="getVOById" resultMap="getVOMap">
