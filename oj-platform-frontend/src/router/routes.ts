@@ -68,4 +68,9 @@ export const routes: Array<RouteRecordRaw> = [
     name: "MD编辑器",
     component: () => import("../components/MdEditor.vue"),
   },
+  {
+    path: "/codeEditor",
+    name: "Code编辑器",
+    component: () => import("../components/CodeEditor.vue"),
+  },
 ];
