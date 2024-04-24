@@ -8,16 +8,31 @@ import highlight from "@bytemd/plugin-highlight";
 import { Editor, Viewer } from "@bytemd/vue-next";
 import { ref } from "vue";
 
+/**
+ * 定义组件属性类型
+ */
+interface Props {
+  value: string;
+  handleChange: (v: string) => void;
+}
+
+
 const plugins = [
   gfm(),
   highlight(),
   // Add more plugins here
 ];
 
-const value = ref("");
+/**
+ * 给组件指定初始值
+ */
 
-const handleChange = (v: string) => {
-  value.value = v;
-};
+const props = withDefaults(defineProps<Props>(), {
+  value: () => "",
+  handleChange: (v: string) => {
+    console.log(v);
+  },
+});
+
 </script>
 <style scoped></style>
