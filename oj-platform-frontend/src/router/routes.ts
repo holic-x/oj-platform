@@ -73,4 +73,9 @@ export const routes: Array<RouteRecordRaw> = [
     name: "Code编辑器",
     component: () => import("../components/CodeEditor.vue"),
   },
+  {
+    path: "/exampleEditor",
+    name: "编辑器示例",
+    component: () => import("../views/ExampleView.vue"),
+  },
 ];
