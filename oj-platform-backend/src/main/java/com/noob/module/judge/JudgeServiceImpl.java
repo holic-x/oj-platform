@@ -17,6 +17,7 @@ import com.noob.module.oj.model.questionSubmit.enums.QuestionSubmitStatusEnum;
 import com.noob.module.oj.service.QuestionService;
 import com.noob.module.oj.service.QuestionSubmitService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * @Author holic-x
  * @Date 2024/5/3 13:18
  */
+@Service
 public class JudgeServiceImpl implements JudgeService {
 
 
@@ -42,6 +44,7 @@ public class JudgeServiceImpl implements JudgeService {
     private String sandboxType;
 
     // 策略模式管理器
+    @Resource
     private JudgeManager judgeManager;
 
     @Override
@@ -98,6 +101,7 @@ public class JudgeServiceImpl implements JudgeService {
         judgeContext.setOutputList(outputList);
         judgeContext.setJudgeCaseList(judgeCaseList);
         judgeContext.setQuestion(question);
+        judgeContext.setQuestionSubmit(questionSubmit);
 
         // 选定策略传入上下文参数执行判题逻辑
         /*

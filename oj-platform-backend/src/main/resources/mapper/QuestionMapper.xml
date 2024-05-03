@@ -53,7 +53,7 @@
         ,title,content,
         tags,answer,submitNum,
         acceptedNum,judgeCase,judgeConfig,
-        thumbNum,favourNum,creater,updater
+        thumbNum,favourNum,
         createTime,updateTime,isDelete
     </sql>
 

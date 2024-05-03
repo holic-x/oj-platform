@@ -28,6 +28,6 @@ public class CodeSandboxProxy implements CodeSandbox{
         log.info("代码沙箱请求信息：" + executeCodeRequest.toString());
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
         log.info("代码沙箱响应信息：" + executeCodeResponse.toString());
-        return null;
+        return executeCodeResponse;
     }
 }

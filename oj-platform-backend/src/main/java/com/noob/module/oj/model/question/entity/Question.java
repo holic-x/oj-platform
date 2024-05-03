@@ -76,16 +76,6 @@ public class Question implements Serializable {
     private Long userId;
 
     /**
-     * 创建用户 id
-     */
-    private Long creater;
-
-    /**
-     * 修改用户 id
-     */
-    private Long updater;
-
-    /**
      * 创建时间
      */
     private Date createTime;
@@ -127,8 +117,6 @@ public class Question implements Serializable {
                 && (this.getJudgeConfig() == null ? other.getJudgeConfig() == null : this.getJudgeConfig().equals(other.getJudgeConfig()))
                 && (this.getThumbNum() == null ? other.getThumbNum() == null : this.getThumbNum().equals(other.getThumbNum()))
                 && (this.getFavourNum() == null ? other.getFavourNum() == null : this.getFavourNum().equals(other.getFavourNum()))
-                && (this.getCreater() == null ? other.getCreater() == null : this.getCreater().equals(other.getCreater()))
-                && (this.getUpdater() == null ? other.getUpdater() == null : this.getUpdater().equals(other.getUpdater()))
                 && (this.getCreateTime() == null ? other.getCreateTime() == null : this.getCreateTime().equals(other.getCreateTime()))
                 && (this.getUpdateTime() == null ? other.getUpdateTime() == null : this.getUpdateTime().equals(other.getUpdateTime()))
                 && (this.getIsDelete() == null ? other.getIsDelete() == null : this.getIsDelete().equals(other.getIsDelete()));
@@ -149,8 +137,6 @@ public class Question implements Serializable {
         result = prime * result + ((getJudgeConfig() == null) ? 0 : getJudgeConfig().hashCode());
         result = prime * result + ((getThumbNum() == null) ? 0 : getThumbNum().hashCode());
         result = prime * result + ((getFavourNum() == null) ? 0 : getFavourNum().hashCode());
-        result = prime * result + ((getCreater() == null) ? 0 : getCreater().hashCode());
-        result = prime * result + ((getUpdater() == null) ? 0 : getUpdater().hashCode());
         result = prime * result + ((getCreateTime() == null) ? 0 : getCreateTime().hashCode());
         result = prime * result + ((getUpdateTime() == null) ? 0 : getUpdateTime().hashCode());
         result = prime * result + ((getIsDelete() == null) ? 0 : getIsDelete().hashCode());
@@ -174,8 +160,6 @@ public class Question implements Serializable {
         sb.append(", judgeConfig=").append(judgeConfig);
         sb.append(", thumbNum=").append(thumbNum);
         sb.append(", favourNum=").append(favourNum);
-        sb.append(", creater=").append(creater);
-        sb.append(", updater=").append(updater);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append(", isDelete=").append(isDelete);

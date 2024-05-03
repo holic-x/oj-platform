@@ -2,6 +2,7 @@ package com.noob.module.judge.strategy;
 
 import com.noob.module.judge.codesandbox.model.JudgeInfo;
 import com.noob.module.oj.model.questionSubmit.entity.QuestionSubmit;
+import com.noob.module.oj.model.questionSubmit.enums.QuestionSubmitLanguageEnum;
 import org.springframework.stereotype.Service;
 
 /**
@@ -22,7 +23,7 @@ public class JudgeManager {
         QuestionSubmit questionSubmit = judgeContext.getQuestionSubmit();
         String language = questionSubmit.getLanguage();
         JudgeStrategy judgeStrategy = new DefaultJudgeStrategy();
-        if ("java".equals(language)) {
+        if (QuestionSubmitLanguageEnum.JAVA.getValue().equals(language)) {
             judgeStrategy = new JavaLanguageJudgeStrategy();
         }
         return judgeStrategy.doJudge(judgeContext);

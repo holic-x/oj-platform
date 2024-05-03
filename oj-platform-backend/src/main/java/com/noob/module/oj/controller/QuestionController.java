@@ -13,7 +13,11 @@ import com.noob.module.base.user.service.UserService;
 import com.noob.module.oj.model.question.dto.*;
 import com.noob.module.oj.model.question.entity.Question;
 import com.noob.module.oj.model.question.vo.QuestionVO;
+import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitAddRequest;
+import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitQueryRequest;
+import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
 import com.noob.module.oj.service.QuestionService;
+import com.noob.module.oj.service.QuestionSubmitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +40,9 @@ public class QuestionController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private QuestionSubmitService questionSubmitService;
 
     private final static Gson GSON = new Gson();
 
@@ -261,5 +268,56 @@ public class QuestionController {
         boolean b = questionService.removeBatchByIds(idList);
         return ResultUtils.success(b);
     }
+
+
+
+    // ---------- 题目提交相关 ----------
+    /**
+     * 提交题目
+     *
+     * @param questionSubmitAddRequest
+     * @param request
+     * @return 提交记录的 id
+     */
+    @PostMapping("/question_submit/do")
+    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
+                                               HttpServletRequest request) {
+        if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 获取登录用户
+        final User loginUser = userService.getLoginUser(request);
+        long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
+        return ResultUtils.success(questionSubmitId);
+    }
+
+    /**
+     * 分页获取题目提交列表（除了管理员外，普通用户只能看到非答案、提交代码等公开信息）
+     *
+     * @param questionSubmitQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/question_submit/list/page")
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                                         HttpServletRequest request) {
+        /*
+        long current = questionSubmitQueryRequest.getCurrent();
+        long size = questionSubmitQueryRequest.getPageSize();
+        // 从数据库中查询原始的题目提交分页信息
+        Page<QuestionSubmit> questionSubmitPage = questionSubmitService.page(new Page<>(current, size),
+                questionSubmitService.getQueryWrapper(questionSubmitQueryRequest));
+        final User loginUser = userService.getLoginUser(request);
+        // 返回脱敏信息
+        return ResultUtils.success(questionSubmitService.getQuestionSubmitVOPage(questionSubmitPage, loginUser));
+         */
+
+        // todo 额外进行权限校验（用户只能访问自己创建的数据，如果是管理员可以访问所有数据）
+
+        // 获取分页信息
+        return ResultUtils.success(questionSubmitService.getVOByPage(questionSubmitQueryRequest));
+
+    }
+
 
 }

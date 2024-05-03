@@ -2,6 +2,8 @@ package com.noob.module.oj.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.noob.module.base.user.model.entity.User;
+import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitAddRequest;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitQueryRequest;
 import com.noob.module.oj.model.questionSubmit.entity.QuestionSubmit;
 import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
@@ -39,6 +41,18 @@ public interface QuestionSubmitService extends IService<QuestionSubmit> {
      * @return
      */
     Page<QuestionSubmitVO> getVOByPage(QuestionSubmitQueryRequest questionSubmitQueryRequest);
+
+
+    /**
+     * 题目提交
+     *
+     * @param questionSubmitAddRequest 题目提交信息
+     * @param loginUser
+     * @return
+     */
+    long doQuestionSubmit(QuestionSubmitAddRequest questionSubmitAddRequest, User loginUser);
+
+
 
 
 }

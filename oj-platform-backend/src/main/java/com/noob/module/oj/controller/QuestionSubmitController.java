@@ -29,8 +29,9 @@ import java.util.List;
 /**
  * 问题提交接口
  */
+@Deprecated
 @RestController
-@RequestMapping("/question/question_submit")
+//@RequestMapping("/question/question_submit")
 @Slf4j
 public class QuestionSubmitController {
 
@@ -87,7 +88,7 @@ public class QuestionSubmitController {
         QuestionSubmit oldQuestionSubmit = questionSubmitService.getById(id);
         ThrowUtils.throwIf(oldQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestionSubmit.getCreater().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionSubmitService.removeById(id);
