@@ -59,10 +59,8 @@ public class QuestionSubmitController {
         questionSubmitService.validQuestionSubmit(questionSubmit, true);
 
         User loginUser = userService.getLoginUser(request);
-        questionSubmit.setCreater(loginUser.getId());
-        questionSubmit.setUpdater(loginUser.getId());
+        questionSubmit.setUserId(loginUser.getId());
         questionSubmit.setCreateTime(new Date());
-        questionSubmit.setUpdateTime(new Date());
 
         // 新增
         boolean result = questionSubmitService.save(questionSubmit);

@@ -36,15 +36,13 @@
         <result property="judgeConfig" column="judgeConfig" jdbcType="VARCHAR"/>
         <result property="thumbNum" column="thumbNum" jdbcType="INTEGER"/>
         <result property="favourNum" column="favourNum" jdbcType="INTEGER"/>
-        <result property="creater" column="creater" jdbcType="BIGINT"/>
-        <result property="updater" column="updater" jdbcType="BIGINT"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
         <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
 
         <!-- 冗余字段createrName：对应列名为createrName -->
-        <result property="createrName" column="createrName" jdbcType="VARCHAR"/>
-        <result property="updaterName" column="updaterName" jdbcType="VARCHAR"/>
+        <result property="userName" column="userName" jdbcType="VARCHAR"/>
+
         <!-- 其他字段映射... -->
 
     </resultMap>
@@ -62,11 +60,9 @@
     <sql id="getVO">
         select
             q.*,
-            cu.userName 'createrName',
-            uu.userName 'updaterName'
+            cu.userName 'userName'
         from question q
-        left join user cu on cu.id = q.creater
-        left join user uu on uu.id = q.updater
+        left join user cu on cu.id = q.userId
         where 1=1 and q.isDelete = 0
     </sql>
 

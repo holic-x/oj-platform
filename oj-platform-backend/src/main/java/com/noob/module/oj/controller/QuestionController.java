@@ -57,7 +57,6 @@ public class QuestionController {
         User loginUser = userService.getLoginUser(request);
         question.setUserId(loginUser.getId());
         question.setCreateTime(new Date());
-        question.setUpdateTime(new Date());
 
         // 设置标签
         List<String> tags = questionAddRequest.getTags();

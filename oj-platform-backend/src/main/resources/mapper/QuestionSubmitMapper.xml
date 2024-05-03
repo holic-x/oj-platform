@@ -35,15 +35,13 @@
         <result property="judgeInfo" column="judgeInfo" jdbcType="VARCHAR"/>
         <result property="status" column="status" jdbcType="INTEGER"/>
         <result property="questionId" column="questionId" jdbcType="BIGINT"/>
-        <result property="creater" column="creater" jdbcType="BIGINT"/>
-        <result property="updater" column="updater" jdbcType="BIGINT"/>
         <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
         <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
         <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
 
         <!-- 冗余字段createrName：对应列名为createrName -->
-        <result property="createrName" column="createrName" jdbcType="VARCHAR"/>
-        <result property="updaterName" column="updaterName" jdbcType="VARCHAR"/>
+        <result property="userName" column="userName" jdbcType="VARCHAR"/>
+
         <!-- 其他字段映射... -->
 
     </resultMap>
@@ -51,11 +49,9 @@
     <sql id="getVO">
         select
             qs.*,
-            cu.userName 'createrName',
-                uu.userName 'updaterName'
+            cu.userName 'userName'
         from question_submit qs
-                 left join user cu on cu.id = qs.creater
-                 left join user uu on uu.id = qs.updater
+        left join user cu on cu.id = qs.userId
         where 1=1 and qs.isDelete = 0
     </sql>
 
