@@ -1,4 +1,4 @@
-package com.noob.oj;
+package com.noob.oj.codesandbox;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
