@@ -1,5 +1,8 @@
-package com.noob.module.oj.model.questionSubmit.vo;
+package com.noob.module.base.template.model.vo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.noob.module.base.user.model.vo.UserVO;
 import com.noob.module.base.template.model.entity.Template;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
@@ -8,61 +11,37 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 问题提交视图
+ * 模板视图
  *
  */
 @Data
-public class QuestionSubmitVO implements Serializable {
+public class TemplateVO implements Serializable {
 
     /**
      * id
      */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /**
-     * 编程语言
+     * 模板名称
      */
-    private String language;
+    private String templateName;
 
     /**
-     * 用户代码
+     * 模板内容
      */
-    private String code;
+    private String templateContent;
 
     /**
-     * 判题信息（json对象）
+     * 创建者
      */
-    private String judgeInfo;
+    private UserVO creater;
 
     /**
-     * 判题状态（0 - 待判题，1 - 判题中，2 - 成功，3 - 失败）
+     * 修改者
      */
-    private Integer status;
-
-    /**
-     * 题目 id
-     */
-    private Long questionId;
-
-    /**
-     * 创建用户 id
-     */
-    private Long creater;
-
-    /**
-     * 创建用户名称
-     */
-    private String createrName;
-
-    /**
-     * 修改用户 id
-     */
-    private String updater;
-
-    /**
-     * 修改用户名称
-     */
-    private String updaterName;
+    private UserVO updater;
 
     /**
      * 创建时间
@@ -70,14 +49,20 @@ public class QuestionSubmitVO implements Serializable {
     private Date createTime;
 
     /**
-     * 更新时间
+     * 修改时间
      */
     private Date updateTime;
 
     /**
-     * 是否删除
+     * 是否删除（0-未删除；1-已删除）
      */
     private Integer isDelete;
+
+    /**
+     * 模板状态（0-待启用；1-已发布）
+     */
+    private Integer status;
+    
 
     /**
      * 包装类转对象
@@ -85,7 +70,7 @@ public class QuestionSubmitVO implements Serializable {
      * @param templateVO
      * @return
      */
-    public static Template voToObj(QuestionSubmitVO templateVO) {
+    public static Template voToObj(TemplateVO templateVO) {
         if (templateVO == null) {
             return null;
         }
@@ -100,11 +85,11 @@ public class QuestionSubmitVO implements Serializable {
      * @param template
      * @return
      */
-    public static QuestionSubmitVO objToVo(Template template) {
+    public static TemplateVO objToVo(Template template) {
         if (template == null) {
             return null;
         }
-        QuestionSubmitVO templateVO = new QuestionSubmitVO();
+        TemplateVO templateVO = new TemplateVO();
         BeanUtils.copyProperties(template, templateVO);
         return templateVO;
     }

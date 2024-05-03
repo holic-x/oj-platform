@@ -8,8 +8,8 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
-import com.noob.module.base.model.entity.User;
-import com.noob.module.base.service.UserService;
+import com.noob.module.base.user.model.entity.User;
+import com.noob.module.base.user.service.UserService;
 import com.noob.module.oj.model.question.dto.*;
 import com.noob.module.oj.model.question.entity.Question;
 import com.noob.module.oj.model.question.vo.QuestionVO;
@@ -54,10 +54,8 @@ public class QuestionController {
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
 
-
         User loginUser = userService.getLoginUser(request);
-        question.setCreater(loginUser.getId());
-        question.setUpdater(loginUser.getId());
+        question.setUserId(loginUser.getId());
         question.setCreateTime(new Date());
         question.setUpdateTime(new Date());
 
@@ -111,7 +109,7 @@ public class QuestionController {
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestion.getCreater().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionService.removeById(id);
@@ -169,8 +167,32 @@ public class QuestionController {
         return ResultUtils.success(result);
     }
 
+
     /**
      * 根据 id 获取
+     *
+     * @param id
+     * @return
+     */
+    @GetMapping("/get")
+    public BaseResponse<Question> getQuestionById(long id, HttpServletRequest request) {
+        if (id <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Question question = questionService.getById(id);
+        if (question == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        // 不是本人或管理员，不能直接获取所有信息
+        if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        return ResultUtils.success(question);
+    }
+    
+    /**
+     * 根据 id 获取 封装信息
      *
      * @param id
      * @return
@@ -186,15 +208,30 @@ public class QuestionController {
 
 
     /**
-     * 分页获取列表（自定义SQL处理）
+     * 分页获取列表（自定义SQL处理）: 提供给管理员
      *
      * @param questionQueryRequest
      * @param request
      * @return
      */
-    @PostMapping("/getVOByPage")
-    public BaseResponse<Page<QuestionVO>> getVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
-                                                     HttpServletRequest request) {
+    @PostMapping("/list/page")
+    public BaseResponse<Page<QuestionVO>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                               HttpServletRequest request) {
+        // 获取分页信息
+        return ResultUtils.success(questionService.getVOByPage(questionQueryRequest));
+    }
+
+
+    /**
+     * 分页获取列表（自定义SQL处理）: 返回封装类（例如进行脱敏），提供给用户
+     *
+     * @param questionQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
+                                                      HttpServletRequest request) {
         // 获取分页信息
         return ResultUtils.success(questionService.getVOByPage(questionQueryRequest));
     }

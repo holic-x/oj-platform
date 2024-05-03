@@ -7,8 +7,10 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
-import com.noob.module.base.model.entity.User;
-import com.noob.module.base.service.UserService;
+import com.noob.module.base.user.model.entity.User;
+import com.noob.module.base.user.service.UserService;
+import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
+import com.noob.module.oj.model.question.vo.QuestionVO;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitAddRequest;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitQueryRequest;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitUpdateRequest;
@@ -28,7 +30,7 @@ import java.util.List;
  * 问题提交接口
  */
 @RestController
-@RequestMapping("/questionSubmit")
+@RequestMapping("/question/question_submit")
 @Slf4j
 public class QuestionSubmitController {
 
@@ -143,12 +145,31 @@ public class QuestionSubmitController {
      * @param request
      * @return
      */
-    @PostMapping("/getVOByPage")
-    public BaseResponse<Page<QuestionSubmitVO>> getVOByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
-                                                     HttpServletRequest request) {
+    @PostMapping("/list/page")
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                                           HttpServletRequest request) {
+
+        // todo 额外进行权限校验（用户只能访问自己创建的数据，如果是管理员可以访问所有数据）
+
         // 获取分页信息
         return ResultUtils.success(questionSubmitService.getVOByPage(questionSubmitQueryRequest));
     }
+
+
+    /**
+     * 分页获取列表（自定义SQL处理）
+     *
+     * @param questionSubmitQueryRequest
+     * @param request
+     * @return
+     */
+    @PostMapping("/list/page/vo")
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitVOByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
+                                                               HttpServletRequest request) {
+        // 获取分页信息
+        return ResultUtils.success(questionSubmitService.getVOByPage(questionSubmitQueryRequest));
+    }
+
 
     // endregion
 

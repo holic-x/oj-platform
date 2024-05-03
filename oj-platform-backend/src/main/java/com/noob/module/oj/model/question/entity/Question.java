@@ -73,6 +73,11 @@ public class Question implements Serializable {
     /**
      * 创建用户 id
      */
+    private Long userId;
+
+    /**
+     * 创建用户 id
+     */
     private Long creater;
 
     /**

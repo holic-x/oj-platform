@@ -1,6 +1,6 @@
 package com.noob.module.oj.model.question.vo;
 
-import com.noob.module.template.model.entity.Template;
+import com.noob.module.base.template.model.entity.Template;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;
 
