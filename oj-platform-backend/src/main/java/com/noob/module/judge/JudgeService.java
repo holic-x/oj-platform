@@ -5,7 +5,7 @@ import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
 
 /**
  * @ClassName JudgeService
- * @Description TODO
+ * @Description 判题服务接口定义
  * @Author holic-x
  * @Date 2024/5/3 13:14
  */

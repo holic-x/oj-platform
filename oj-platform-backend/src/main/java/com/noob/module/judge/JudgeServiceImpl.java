@@ -1,7 +1,5 @@
 package com.noob.module.judge;
 
-import java.util.Date;
-
 import cn.hutool.json.JSONUtil;
 import com.noob.framework.common.ErrorCode;
 import com.noob.framework.exception.BusinessException;
@@ -11,13 +9,11 @@ import com.noob.module.judge.codesandbox.CodeSandboxProxy;
 import com.noob.module.judge.codesandbox.model.ExecuteCodeRequest;
 import com.noob.module.judge.codesandbox.model.ExecuteCodeResponse;
 import com.noob.module.judge.codesandbox.model.JudgeInfo;
+import com.noob.module.judge.strategy.*;
 import com.noob.module.oj.model.question.dto.JudgeCase;
-import com.noob.module.oj.model.question.dto.JudgeConfig;
 import com.noob.module.oj.model.question.entity.Question;
 import com.noob.module.oj.model.questionSubmit.entity.QuestionSubmit;
-import com.noob.module.oj.model.questionSubmit.enums.JudgeInfoMessageEnum;
 import com.noob.module.oj.model.questionSubmit.enums.QuestionSubmitStatusEnum;
-import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
 import com.noob.module.oj.service.QuestionService;
 import com.noob.module.oj.service.QuestionSubmitService;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,7 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * @ClassName JudgeServiceImpl
- * @Description TODO
+ * @Description 判题服务接口实现
  * @Author holic-x
  * @Date 2024/5/3 13:18
  */
@@ -44,6 +40,9 @@ public class JudgeServiceImpl implements JudgeService {
     // 沙箱参数：沙箱类型（如果没有指定则默认为example）
     @Value("${codesandbox.type:example}")
     private String sandboxType;
+
+    // 策略模式管理器
+    private JudgeManager judgeManager;
 
     @Override
     public QuestionSubmit doJudge(long questionSubmitId) {
@@ -84,6 +83,7 @@ public class JudgeServiceImpl implements JudgeService {
         List<JudgeCase> judgeCaseList = JSONUtil.toList(judgeCaseStr, JudgeCase.class);
         // 借助Lambda表达式获取用例的输入并拼接为List
         List<String> inputList = judgeCaseList.stream().map(JudgeCase::getInput).collect(Collectors.toList());
+        List<String> outputList = judgeCaseList.stream().map(JudgeCase::getOutput).collect(Collectors.toList());
         ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
                 .code(code)
                 .language(language)
@@ -91,41 +91,27 @@ public class JudgeServiceImpl implements JudgeService {
                 .build();
         ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
 
-
         // 5）根据沙箱的执行结果，设置题目的判题状态和信息
-        List<String> outputList = executeCodeResponse.getOutputList();
-        JudgeInfoMessageEnum judgeInfoMessageEnum = JudgeInfoMessageEnum.ACCEPTED;
-        if (outputList.size() != inputList.size()) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
-        }
-        // 循环校验判题列表的output和调用沙箱获取到的输出是否一致
-        for (int i = 0; i < judgeCaseList.size(); i++) {
-            JudgeCase judgeCase = judgeCaseList.get(i);
-            if (!judgeCase.getOutput().equals(outputList.get(i))) {
-                judgeInfoMessageEnum = JudgeInfoMessageEnum.WRONG_ANSWER;
-                return null;
-            }
-        }
+        JudgeContext judgeContext = new JudgeContext();
+        judgeContext.setJudgeInfo(executeCodeResponse.getJudgeInfo());
+        judgeContext.setInputList(inputList);
+        judgeContext.setOutputList(outputList);
+        judgeContext.setJudgeCaseList(judgeCaseList);
+        judgeContext.setQuestion(question);
 
-        // 判断题目限制(todo 后期完善多补充一些判题逻辑信息)
-        String message = executeCodeResponse.getMessage();
-//        Integer status = executeCodeResponse.getStatus();
-        JudgeInfo judgeInfo = executeCodeResponse.getJudgeInfo();
-//        String message = judgeInfo.getMessage();
-        Long memory = judgeInfo.getMemory();
-        Long time = judgeInfo.getTime();
-        // 获取判题配置
-        String judgeConfigStr = question.getJudgeConfig();
-        JudgeConfig judgeConfig = JSONUtil.toBean(judgeConfigStr, JudgeConfig.class);
-        Long needMemoryLimit = judgeConfig.getMemoryLimit();
-        Long needTimeLimit = judgeConfig.getTimeLimit();
-        if (memory > needMemoryLimit) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.MEMORY_LIMIT_EXCEEDED;
+        // 选定策略传入上下文参数执行判题逻辑
+        /*
+        方式1：选择不同的策略模式
+        JudgeStrategy judgeStrategy = new DefaultJudgeStrategy();
+        // 根据language选择不同的language
+        if("java".equals(questionSubmit.getLanguage())){
+            judgeStrategy = new JavaLanguageJudgeStrategy();
         }
-        if (time > needTimeLimit) {
-            judgeInfoMessageEnum = JudgeInfoMessageEnum.TIME_LIMIT_EXCEEDED;
-        }
+        JudgeInfo judgeInfo = judgeStrategy.doJudge(judgeContext);
+         */
 
+        // 方式2：通过JudgeManager进行选择
+        JudgeInfo judgeInfo = judgeManager.doJudge(judgeContext);
 
         // 6）修改数据库中的判题结果
         questionSubmitUpdate = new QuestionSubmit();
