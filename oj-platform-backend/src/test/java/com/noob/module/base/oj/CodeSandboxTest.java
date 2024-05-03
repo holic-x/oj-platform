@@ -2,6 +2,7 @@ package com.noob.module.base.oj;
 
 import com.noob.module.judge.codesandbox.CodeSandbox;
 import com.noob.module.judge.codesandbox.CodeSandboxFactory;
+import com.noob.module.judge.codesandbox.CodeSandboxProxy;
 import com.noob.module.judge.codesandbox.impl.RemoteCodeSandbox;
 import com.noob.module.judge.codesandbox.model.ExecuteCodeRequest;
 import com.noob.module.judge.codesandbox.model.ExecuteCodeResponse;
@@ -29,7 +30,31 @@ public class CodeSandboxTest {
     private String sandboxType;
 
 
-    // 参数配置化
+    // 优化3：引入代理类：代理增强实现日志打印
+    @Test
+    void test3(){
+        System.out.println("当前沙箱配置参数：" + sandboxType);
+        // 根据type动态生成相应的实现
+        CodeSandbox codeSandbox = CodeSandboxFactory.newInstance(sandboxType);
+        // 代理增强
+        codeSandbox = new CodeSandboxProxy(codeSandbox);
+
+        String code = "int main() { }";
+        String language = QuestionSubmitLanguageEnum.JAVA.getValue();
+        List<String> inputList = Arrays.asList("1 2", "3 4");
+        ExecuteCodeRequest executeCodeRequest = ExecuteCodeRequest.builder()
+                .code(code)
+                .language(language)
+                .inputList(inputList)
+                .build();
+        // 调用沙箱接口
+        ExecuteCodeResponse executeCodeResponse = codeSandbox.executeCode(executeCodeRequest);
+        System.out.println(executeCodeResponse);
+    }
+
+
+
+    // 优化2：参数配置化
     @Test
     void test2(){
         System.out.println("当前沙箱配置参数：" + sandboxType);
@@ -52,7 +77,7 @@ public class CodeSandboxTest {
 
     }
 
-    // 工厂模式方式执行代码
+    // 优化1：工厂模式方式执行代码
     static void test1() {
         Scanner scanner = new Scanner(System.in);
         while (scanner.hasNextLine()) {
