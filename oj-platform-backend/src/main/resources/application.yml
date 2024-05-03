@@ -102,3 +102,7 @@ knife4j:
           - com.noob.module.base.template.controller
           - com.noob.module.base.dataInfo.controller
           - com.noob.module.oj.controller
+
+# 代码沙箱配置
+codesandbox:
+  type: remote
