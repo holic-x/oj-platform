@@ -1,2 +1,4 @@
 /oj-platform-backend/src/main/resources/application-remote.yml
 /oj-platform-frontend/generated
+/oj-code-sandbox/.idea
+/oj-code-sandbox/target
