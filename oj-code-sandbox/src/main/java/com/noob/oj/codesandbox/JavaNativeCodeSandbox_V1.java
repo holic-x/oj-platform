@@ -3,14 +3,10 @@ package com.noob.oj.codesandbox;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.dfa.FoundWord;
-import cn.hutool.dfa.WordTree;
 import com.noob.oj.codesandbox.model.ExecuteCodeRequest;
 import com.noob.oj.codesandbox.model.ExecuteCodeResponse;
 import com.noob.oj.codesandbox.model.ExecuteMessage;
 import com.noob.oj.codesandbox.model.JudgeInfo;
-import com.noob.oj.codesandbox.security.DefaultSecurityManager;
-import com.noob.oj.codesandbox.security.DenySecurityManager;
 import com.noob.oj.codesandbox.utils.ProcessUtils;
 
 import java.io.File;
@@ -22,11 +18,12 @@ import java.util.UUID;
 
 /**
  * @ClassName JavaNativeCodeSandbox
- * @Description Java原生沙箱实现（优化版本）
+ * @Description Java原生沙箱实现（基础版本）
  * @Author holic-x
  * @Date 2024/5/3 19:08
  */
-public class JavaNativeCodeSandbox implements CodeSandbox {
+@Deprecated
+public class JavaNativeCodeSandbox_V1 implements CodeSandbox {
 
     // 全局文件存储文件夹定义
     private static final String GLOBAL_CODE_DIR_NAME = "tmpCode";
@@ -34,33 +31,13 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
     // 存储的文件名定义
     private static final String GLOBAL_JAVA_CLASS_NAME = "Main.java";
 
-    // 设置超时控制时长
-    private static final long TIME_OUT = 5000L;
-
-    // 定义黑名单
-    public static final List<String> blackList = Arrays.asList("Files", "exec");
-
-    public static final WordTree WORD_TREE;
-
-    static {
-        //初始化字典树
-        WORD_TREE = new WordTree();
-        WORD_TREE.addWords(blackList);
-    }
-
-    // 自定义安全管理器存储路径
-    private static final String SECURITY_MANAGER_PATH = "E:\\workspace\\Git\\github\\PROJECT\\noob\\oj-platform\\oj-code-sandbox\\src\\main\\resources\\security";
-
-    // 自定义安全管理器类名
-    private static final String SECURITY_MANAGER_CLASS_NAME = "MySecurityManager";
-
     public static void main(String[] args) {
 
-        JavaNativeCodeSandbox javaNativeCodeSandbox = new JavaNativeCodeSandbox();
+        JavaNativeCodeSandbox_V1 javaNativeCodeSandbox = new JavaNativeCodeSandbox_V1();
         ExecuteCodeRequest executeCodeRequest = new ExecuteCodeRequest();
         executeCodeRequest.setInputList(Arrays.asList("1 2", "1 3"));
 //        String code = ResourceUtil.readStr("testCode/simpleComputeArgs/Main.java", StandardCharsets.UTF_8);
-        // todo 设置访问的文件路径
+
         String code = ResourceUtil.readStr("testCode/unsafeCode/RunFileError.java", StandardCharsets.UTF_8);
         executeCodeRequest.setCode(code);
         executeCodeRequest.setLanguage("java");
@@ -72,21 +49,9 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
 
     @Override
     public ExecuteCodeResponse executeCode(ExecuteCodeRequest executeCodeRequest) {
-        // 设定安全管理器（外层设定安全管理器会根据规则限制程序的所有操作，例如自身项目程序以及要执行的代码程序）
-//        System.setSecurityManager(new DenySecurityManager());
-
         List<String> inputList = executeCodeRequest.getInputList();
         String code = executeCodeRequest.getCode();
         String language = executeCodeRequest.getLanguage();
-
-        // 优化3：校验代码中是否包含黑名单命令
-        /*
-        FoundWord foundWord = WORD_TREE.matchWord(code);
-        if (foundWord != null) {
-            System.out.println("包含禁止词：" + foundWord.getFoundWord());
-            return null;
-        }
-         */
 
         // 1）把用户的代码保存为文件
         String userDir = System.getProperty("user.dir");
@@ -118,27 +83,9 @@ public class JavaNativeCodeSandbox implements CodeSandbox {
         // 3）执行代码，得到输出结果（命令中指定 -Dfile.encoding=UTF-8 参数，解决中文乱码）
         List<ExecuteMessage> executeMessageList = new ArrayList<>();
         for (String inputArgs : inputList) {
-//            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
-            // 优化2：限制资源分配
-//            String runCmd = String.format("java -Xmx4096m -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
-
-
-            // 优化4：设定自定义安全管理器(测试校验执行权限是否放行)
-            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s;%s -Djava.security.manager=%s Main %s", userCodeParentPath,SECURITY_MANAGER_PATH,SECURITY_MANAGER_CLASS_NAME, inputArgs);
-
-
+            String runCmd = String.format("java -Dfile.encoding=UTF-8 -cp %s Main %s", userCodeParentPath, inputArgs);
             try {
                 Process runProcess = Runtime.getRuntime().exec(runCmd);
-                // 优化1：超时控制
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(TIME_OUT);
-                        System.out.println("超时了，中断");
-                        runProcess.destroy();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).start();
                 ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(runProcess, "运行");
                 System.out.println(executeMessage);
                 // 将执行结果加入列表
