@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @ClassName JavaDockerCodeSandbox
@@ -129,15 +130,15 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
         // 创建容器
         CreateContainerCmd containerCmd = dockerClient.createContainerCmd(image);
         HostConfig hostConfig = new HostConfig();
-        hostConfig.withMemory(100 * 1000 * 1000L); // 限制内存
-        hostConfig.withMemorySwap(0L);
+        hostConfig.withMemory(100 * 1000 * 1000L); // 限制内存资源
+        hostConfig.withMemorySwap(0L);// 限制内存资源：设置内存交换
         hostConfig.withCpuCount(1L); // 限制CPU
-//        hostConfig.withSecurityOpts(Arrays.asList("seccomp=安全管理配置字符串"));
+//        hostConfig.withSecurityOpts(Arrays.asList("seccomp=安全管理配置字符串"));// todo 权限管理机制（linux的安全管理措施seccomp、结合Java安全管理器使用）
         hostConfig.setBinds(new Bind(userCodeParentPath, new Volume("/app"))); // 容器映射，一般不要放在根目录
         CreateContainerResponse createContainerResponse = containerCmd
                 .withHostConfig(hostConfig)
-                .withNetworkDisabled(true)
-                .withReadonlyRootfs(true)
+                .withNetworkDisabled(true)  // 限制网络资源：设置禁用网络
+                .withReadonlyRootfs(true) // 权限管理：限制用户不能向root根目录写文件
                 .withAttachStdin(true)
                 .withAttachStderr(true)
                 .withAttachStdout(true)
@@ -171,8 +172,18 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             final String[] message = {null};
             final String[] errorMessage = {null};
 
+            // 判断是否超时
+            final boolean[] timeout = {true};
             String execId = execCreateCmdResponse.getId();
             ExecStartResultCallback execStartResultCallback = new ExecStartResultCallback() {
+
+                @Override
+                public void onComplete() {
+                    // 如果执行完成，则表示没超时
+                    timeout[0] = false;
+                    super.onComplete();
+                }
+
                 @Override
                 public void onNext(Frame frame) {
                     //
@@ -226,7 +237,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                 // 将回调结果传递过来，并且阻塞等待日志输出
                 dockerClient.execStartCmd(execId)
                         .exec(execStartResultCallback)
-                        .awaitCompletion();
+                        .awaitCompletion(TIME_OUT, TimeUnit.MICROSECONDS);
                 stopWatch.stop();
                 time = stopWatch.getLastTaskTimeMillis();
 
@@ -247,7 +258,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
             executeMessageList.add(executeMessage);
         }
 
-        // 封装响应结果（和此前的原生Java方式完全一致）
+        // 5)封装响应结果（和此前的原生Java方式完全一致）
         ExecuteCodeResponse executeCodeResponse = new ExecuteCodeResponse();
         List<String> outputList = new ArrayList<>();
         // 取用时最大值，便于判断是否超时
@@ -277,18 +288,17 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
         // judgeInfo.setMemory();
         executeCodeResponse.setJudgeInfo(judgeInfo);
 
-        // 5）文件清理
+        // 6）文件清理
         if (userCodeFile.getParentFile() != null) {
             boolean del = FileUtil.del(userCodeParentPath);
             System.out.println("删除" + (del ? "成功" : "失败"));
         }
 
-        // 6）错误处理，提升程序健壮性（通过自定义封装getErrorResponse错误处理方法，当程序抛出异常时，直接返回错误响应）参考getErrorResponse方法
+        // 7）错误处理，提升程序健壮性（通过自定义封装getErrorResponse错误处理方法，当程序抛出异常时，直接返回错误响应）参考getErrorResponse方法
 
         // 返回执行代码结果响应
         return executeCodeResponse;
     }
-
 
     /**
      * 获取错误响应
