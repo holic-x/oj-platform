@@ -4,10 +4,8 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.ArrayUtil;
 import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.CreateContainerCmd;
-import com.github.dockerjava.api.command.CreateContainerResponse;
-import com.github.dockerjava.api.command.ExecCreateCmdResponse;
-import com.github.dockerjava.api.command.PullImageCmd;
+import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.command.*;
 import com.github.dockerjava.core.command.ExecStartResultCallback;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.*;
@@ -19,7 +17,10 @@ import com.noob.oj.codesandbox.model.JudgeInfo;
 import com.noob.oj.codesandbox.utils.ProcessUtils;
 
 import org.springframework.util.StopWatch;
+
+import java.io.Closeable;
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,7 +104,7 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
         // 获取默认的 Docker Client
         DockerClient dockerClient = DockerClientBuilder.getInstance().build();
         String image = "openjdk:8-alpine";
-        if(FIRST_INIT){
+        if (FIRST_INIT) {
             // 初始化镜像（不用每次都去拉取镜像，只需要初始化一次）
             PullImageCmd pullImageCmd = dockerClient.pullImageCmd(image);
             PullImageResultCallback pullImageResultCallback = new PullImageResultCallback() {
@@ -185,6 +186,40 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                     super.onNext(frame);
                 }
             };
+
+            final long[] maxMemory = {0L};
+            // 获取占用的内存
+            StatsCmd statsCmd = dockerClient.statsCmd(containerId);
+            ResultCallback<Statistics> statisticsResultCallback = statsCmd.exec(new ResultCallback<Statistics>() {
+
+                @Override
+                public void onNext(Statistics statistics) {
+                    System.out.println("内存占用：" + statistics.getMemoryStats().getUsage());
+                    maxMemory[0] = Math.max(statistics.getMemoryStats().getUsage(), maxMemory[0]);
+                }
+
+                @Override
+                public void close() throws IOException {
+
+                }
+
+                @Override
+                public void onStart(Closeable closeable) {
+
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
+                }
+
+                @Override
+                public void onComplete() {
+
+                }
+            });
+            statsCmd.exec(statisticsResultCallback);
+
             try {
                 stopWatch.start();
                 // 将回调结果传递过来，并且阻塞等待日志输出
@@ -193,15 +228,21 @@ public class JavaDockerCodeSandbox implements CodeSandbox {
                         .awaitCompletion();
                 stopWatch.stop();
                 time = stopWatch.getLastTaskTimeMillis();
+
+                // 关闭（否则可能一直输出）
+                statsCmd.close();
+
             } catch (InterruptedException e) {
                 System.out.println("程序执行异常");
                 throw new RuntimeException(e);
             }
 
             // 设置执行信息
-            executeMessage.setTime(time);
             executeMessage.setMessage(message[0]);
             executeMessage.setErrorMessage(errorMessage[0]);
+            executeMessage.setTime(time);
+            executeMessage.setMemory(maxMemory[0]);
+            // 将执行信息加入列表
             executeMessageList.add(executeMessage);
         }
 
