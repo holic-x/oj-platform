@@ -29,6 +29,15 @@ public class CodeSandboxTest {
     @Value("${codesandbox.type:example}")
     private String sandboxType;
 
+    // 沙箱参数：远程访问URL（如果没有指定则默认为localhost）
+    @Value("${codesandbox.remoteUrl}")
+    private String sandboxRemoteUrl;
+
+    @Test
+    void test4(){
+        System.out.println("当前指定参数：" + sandboxRemoteUrl);
+    }
+
 
     // 优化3：引入代理类：代理增强实现日志打印
     @Test
