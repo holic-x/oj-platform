@@ -1,5 +1,7 @@
 package com.noob.oj.codesandbox.controller;
 
+import com.noob.framework.common.BaseResponse;
+import com.noob.framework.common.ResultUtils;
 import com.noob.oj.codesandbox.JavaNativeCodeSandbox;
 import com.noob.oj.codesandbox.model.ExecuteCodeRequest;
 import com.noob.oj.codesandbox.model.ExecuteCodeResponse;
@@ -53,6 +55,28 @@ public class MainController {
             throw new RuntimeException("请求参数为空");
         }
         return javaNativeCodeSandbox.executeCode(executeCodeRequest);
+    }
+
+
+    /**
+     * 执行代码（调用代码沙箱的开发接口）
+     * @param executeCodeRequest
+     * @return
+     */
+    @PostMapping("/onlineRun")
+    BaseResponse<ExecuteCodeResponse> onlineRun(@RequestBody ExecuteCodeRequest executeCodeRequest, HttpServletRequest request,
+                           HttpServletResponse response) {
+        // 基本的认证
+        String authHeader = request.getHeader(AUTH_REQUEST_HEADER);
+        if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
+            response.setStatus(403);
+            return null;
+        }
+
+        if (executeCodeRequest == null) {
+            throw new RuntimeException("请求参数为空");
+        }
+        return ResultUtils.success(javaNativeCodeSandbox.executeCode(executeCodeRequest));
     }
 }
 

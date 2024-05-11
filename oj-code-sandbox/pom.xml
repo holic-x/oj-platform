@@ -89,7 +89,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>com.noob.oj.codesandbox.OjCodeSandboxApplication</mainClass>
+                    <mainClass>com.noob.OjCodeSandboxApplication</mainClass>
                     <skip>true</skip>
                 </configuration>
                 <executions>
