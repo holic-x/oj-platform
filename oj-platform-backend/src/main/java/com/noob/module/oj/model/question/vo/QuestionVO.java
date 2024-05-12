@@ -33,7 +33,8 @@ public class QuestionVO implements Serializable {
     /**
      * 标签列表（json 数组）
      */
-//    private String tags;
+    private String tagsStr;
+
     private List<String> tags;
 
     /**

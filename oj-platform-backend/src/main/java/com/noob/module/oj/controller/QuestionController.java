@@ -1,6 +1,7 @@
 package com.noob.module.oj.controller;
 
 
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.gson.Gson;
 import com.noob.framework.annotation.AuthCheck;
@@ -26,6 +27,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 问题接口
@@ -223,8 +225,19 @@ public class QuestionController {
     @PostMapping("/list/page")
     public BaseResponse<Page<QuestionVO>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                                HttpServletRequest request) {
+        Page<QuestionVO> questionVOPage = questionService.getVOByPage(questionQueryRequest);
+
+        // 处理标签数据信息
+        List<QuestionVO> questionVOList = questionVOPage.getRecords().stream().map(questionVO -> {
+            List<String> tagList = JSONUtil.toList(questionVO.getTagsStr(), String.class);
+            // 设置标签列表数据
+            questionVO.setTags(tagList);
+            return questionVO;
+        }).collect(Collectors.toList());
+
+        questionVOPage.setRecords(questionVOList);
         // 获取分页信息
-        return ResultUtils.success(questionService.getVOByPage(questionQueryRequest));
+        return ResultUtils.success(questionVOPage);
     }
 
 
@@ -238,8 +251,23 @@ public class QuestionController {
     @PostMapping("/list/page/vo")
     public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
                                                       HttpServletRequest request) {
+
+        Page<QuestionVO> questionVOPage = questionService.getVOByPage(questionQueryRequest);
+
+        // 处理标签数据信息
+        List<QuestionVO> questionVOList = questionVOPage.getRecords().stream().map(questionVO -> {
+            List<String> tagList = JSONUtil.toList(questionVO.getTagsStr(), String.class);
+            // 设置标签列表数据
+            questionVO.setTags(tagList);
+            return questionVO;
+        }).collect(Collectors.toList());
+
+        questionVOPage.setRecords(questionVOList);
         // 获取分页信息
-        return ResultUtils.success(questionService.getVOByPage(questionQueryRequest));
+        return ResultUtils.success(questionVOPage);
+
+        // 获取分页信息
+//        return ResultUtils.success(questionService.getVOByPage(questionQueryRequest));
     }
 
     // endregion

@@ -29,7 +29,8 @@
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
 <!--        <result property="tags" column="tags" typeHandler="VARCHAR"/>-->
-        <result property="tags" column="tags" typeHandler="com.noob.framework.typehandler.ListTypeHandler"/>
+        <result property="tagsStr" column="tags" jdbcType="VARCHAR"/>
+<!--        <result property="tags" column="tags" typeHandler="com.noob.framework.typehandler.ListTypeHandler"/>-->
         <result property="answer" column="answer" jdbcType="VARCHAR"/>
         <result property="submitNum" column="submitNum" jdbcType="INTEGER"/>
         <result property="acceptedNum" column="acceptedNum" jdbcType="INTEGER"/>
