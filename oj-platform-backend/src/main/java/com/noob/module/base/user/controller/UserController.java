@@ -3,36 +3,33 @@ package com.noob.module.base.user.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.noob.framework.annotation.AuthCheck;
 import com.noob.framework.common.*;
-import com.noob.framework.exception.ThrowUtils;
 import com.noob.framework.config.WxOpenConfig;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
+import com.noob.framework.exception.ThrowUtils;
+import com.noob.module.base.user.model.dto.user.*;
 import com.noob.module.base.user.model.entity.User;
 import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.model.vo.UserVO;
+import com.noob.module.base.user.service.AccountService;
 import com.noob.module.base.user.service.UserService;
-
-import java.util.Date;
-import java.util.List;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import com.noob.module.base.user.model.dto.user.*;
 import com.noob.module.base.user.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 用户接口
@@ -45,6 +42,9 @@ public class UserController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private AccountService accountService;
 
     @Resource
     private WxOpenConfig wxOpenConfig;
@@ -85,6 +85,7 @@ public class UserController {
      */
     @PostMapping("/login")
     public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
+        /*
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -94,6 +95,20 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
+        return ResultUtils.success(loginUserVO);
+         */
+        if (userLoginRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String userAccount = userLoginRequest.getUserAccount();
+        String userPassword = userLoginRequest.getUserPassword();
+        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 调用登陆验证方法（经Shiro机制处理）
+        LoginUserVO loginUserVO = accountService.userLogin(userAccount, userPassword, request);
+
+        // 返回登陆成功的用户信息
         return ResultUtils.success(loginUserVO);
     }
 
@@ -128,11 +143,16 @@ public class UserController {
      */
     @PostMapping("/logout")
     public BaseResponse<Boolean> userLogout(HttpServletRequest request) {
+        /*
         if (request == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         boolean result = userService.userLogout(request);
         return ResultUtils.success(result);
+         */
+        // 调用登陆退出方法
+        accountService.userLogout();
+        return ResultUtils.success(true);
     }
 
     /**
@@ -143,8 +163,17 @@ public class UserController {
      */
     @GetMapping("/get/login")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
+        /*
         User user = userService.getLoginUser(request);
         return ResultUtils.success(userService.getLoginUserVO(user));
+         */
+        // 获取当前登陆用户信息（基于shiro获取）
+        Subject subject = SecurityUtils.getSubject();
+        LoginUserVO currentUser = (LoginUserVO) subject.getPrincipal();
+        if(currentUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR,"当前用户未登录");
+        }
+        return ResultUtils.success(currentUser);
     }
 
     // endregion

@@ -54,7 +54,9 @@ public class ProcessUtils {
                 while ((compileOutputLine = bufferedReader.readLine()) != null) {
                     outputStrList.add(compileOutputLine);
                 }
-                executeMessage.setMessage(StringUtils.join(outputStrList, "\n"));
+                // 封装输出信息
+                String message = StringUtils.join(outputStrList, "\n");
+                executeMessage.setMessage(message);
 
                 // 分批获取进程的错误输出
                 BufferedReader errorBufferedReader = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
@@ -65,7 +67,10 @@ public class ProcessUtils {
                 while ((errorCompileOutputLine = errorBufferedReader.readLine()) != null) {
                     errorOutputStrList.add(errorCompileOutputLine);
                 }
-                executeMessage.setErrorMessage(StringUtils.join(errorOutputStrList, "\n"));
+
+                // 错误信息定义
+                String errorMessage = StringUtils.join(errorOutputStrList, "\n");
+                executeMessage.setErrorMessage(errorMessage);
             }
             stopWatch.stop();
             executeMessage.setTime(stopWatch.getLastTaskTimeMillis());
@@ -76,7 +81,7 @@ public class ProcessUtils {
     }
 
     /**
-     * 执行交互式进程并获取信息（参考：以simpleCompute/Main.java为例演示交互式输入方式操作）
+     * 执行交互式进程并获取信息（参考：以simpleCompute/Main.java为例演示交互式输入方式操作） todo
      *
      * @param runProcess
      * @param args

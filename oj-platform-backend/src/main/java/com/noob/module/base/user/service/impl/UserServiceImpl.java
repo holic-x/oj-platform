@@ -6,28 +6,28 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.noob.framework.common.ErrorCode;
 import com.noob.framework.constant.CommonConstant;
 import com.noob.framework.constant.UserConstant;
+import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
+import com.noob.framework.realm.ShiroUtil;
+import com.noob.framework.utils.SqlUtils;
 import com.noob.module.base.user.mapper.UserMapper;
+import com.noob.module.base.user.model.dto.user.UserQueryRequest;
+import com.noob.module.base.user.model.entity.User;
 import com.noob.module.base.user.model.enums.UserRoleEnum;
 import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.model.vo.UserVO;
 import com.noob.module.base.user.service.UserService;
-import com.noob.framework.utils.SqlUtils;
-import com.noob.framework.exception.BusinessException;
-import com.noob.module.base.user.model.dto.user.UserQueryRequest;
-import com.noob.module.base.user.model.entity.User;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
-
 import lombok.extern.slf4j.Slf4j;
 import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务实现
@@ -149,6 +149,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public User getLoginUser(HttpServletRequest request) {
+        /*
         // 先判断是否已登录
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         User currentUser = (User) userObj;
@@ -166,6 +167,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         ThrowUtils.throwIf(UserConstant.USER_STATUS_FORBID.equals(currentUserStatus), ErrorCode.USER_STATUS_FORBID_ERROR);
         // 返回登录用户信息
         return currentUser;
+         */
+
+
+
+        // 调整为shiro接管，获取并校验当前登录用户信息和状态
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
+        if (currentUser == null || currentUser.getId() == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 从数据库获取用户最新信息
+        User findUser = this.getById(currentUser.getId());
+        if(findUser==null){
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR,"当前登录用户信息不存在");
+        }
+        // 校验用户状态
+        Integer currentUserStatus = findUser.getUserStatus();
+        ThrowUtils.throwIf(UserConstant.USER_STATUS_FORBID.equals(currentUserStatus), ErrorCode.USER_STATUS_FORBID_ERROR);
+        // 返回登录用户信息
+        return findUser;
+
     }
 
     /**

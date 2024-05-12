@@ -92,15 +92,15 @@ public abstract class JavaCodeSandboxTemplate implements CodeSandbox {
             ExecuteMessage executeMessage = ProcessUtils.runProcessAndGetMessage(compileProcess, "编译");
             if (executeMessage.getExitValue() != 0) {
                 // 程序编译错误
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"编译错误");
+                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"程序异常退出");
+//                throw new BusinessException(ErrorCode.SYSTEM_ERROR,"编译错误" + executeMessage.getErrorMessage());
 //                throw new RuntimeException("编译错误");
             }
-
             return executeMessage;
         } catch (Exception e) {
 //            return getErrorResponse(e);
 //            throw new RuntimeException(e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"编译错误");
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR,"程序编译错误");
 
         }
     }

@@ -9,7 +9,9 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.user.model.entity.User;
+import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.service.UserService;
 import com.noob.module.oj.model.question.dto.*;
 import com.noob.module.oj.model.question.entity.Question;
@@ -20,6 +22,7 @@ import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
 import com.noob.module.oj.service.QuestionService;
 import com.noob.module.oj.service.QuestionSubmitService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +58,7 @@ public class QuestionController {
      * @param request
      * @return
      */
+    @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/add")
     public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
         if (questionAddRequest == null) {
@@ -106,12 +110,14 @@ public class QuestionController {
      * @param request
      * @return
      */
+    @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/delete")
     public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User user = userService.getLoginUser(request);
+//        LoginUserVO loginUserVO = ShiroUtil.getCurrentUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
@@ -130,6 +136,7 @@ public class QuestionController {
      * @param questionUpdateRequest
      * @return
      */
+    @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> updateQuestion(@RequestBody QuestionUpdateRequest questionUpdateRequest) {
@@ -280,6 +287,7 @@ public class QuestionController {
      * @param request
      * @return
      */
+    @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/batchDeleteQuestion")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public BaseResponse<Boolean> batchDeleteQuestion(@RequestBody BatchDeleteRequest batchDeleteRequest, HttpServletRequest request) {

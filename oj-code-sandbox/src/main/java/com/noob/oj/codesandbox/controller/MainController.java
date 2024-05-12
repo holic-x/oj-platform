@@ -55,9 +55,12 @@ public class MainController {
 //            return null;
         }
 
+        // 校验参数信息
         if (executeCodeRequest == null) {
-            throw new RuntimeException("请求参数为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数为空");
         }
+
+        // 返回响应
         return javaNativeCodeSandbox.executeCode(executeCodeRequest);
     }
 
@@ -78,9 +81,11 @@ public class MainController {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"鉴权失败，请确认后再次尝试");
         }
 
+        // 校验参数信息
         if (executeCodeRequest == null) {
-            throw new RuntimeException("请求参数为空");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数为空");
         }
+
         // 封装一层响应信息
         return ResultUtils.success(javaNativeCodeSandbox.executeCode(executeCodeRequest));
     }
