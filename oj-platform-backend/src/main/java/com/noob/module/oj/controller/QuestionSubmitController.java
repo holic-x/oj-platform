@@ -7,10 +7,9 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.user.model.entity.User;
 import com.noob.module.base.user.service.UserService;
-import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
-import com.noob.module.oj.model.question.vo.QuestionVO;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitAddRequest;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitQueryRequest;
 import com.noob.module.oj.model.questionSubmit.dto.QuestionSubmitUpdateRequest;
@@ -19,7 +18,10 @@ import com.noob.module.oj.model.questionSubmit.vo.QuestionSubmitVO;
 import com.noob.module.oj.service.QuestionSubmitService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -45,11 +47,10 @@ public class QuestionSubmitController {
     /**
      * 创建
      * @param questionSubmitAddRequest
-     * @param request
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Long> addQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest) {
         if (questionSubmitAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -59,7 +60,7 @@ public class QuestionSubmitController {
         // 设置状态
         questionSubmitService.validQuestionSubmit(questionSubmit, true);
 
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser();
         questionSubmit.setUserId(loginUser.getId());
         questionSubmit.setCreateTime(new Date());
 
@@ -74,21 +75,20 @@ public class QuestionSubmitController {
      * 删除
      *
      * @param deleteRequest
-     * @param request
      * @return
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteQuestionSubmit(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteQuestionSubmit(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userService.getLoginUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         QuestionSubmit oldQuestionSubmit = questionSubmitService.getById(id);
         ThrowUtils.throwIf(oldQuestionSubmit == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestionSubmit.getUserId().equals(user.getId()) && !ShiroUtil.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionSubmitService.removeById(id);
@@ -141,12 +141,10 @@ public class QuestionSubmitController {
      * 分页获取列表（自定义SQL处理）
      *
      * @param questionSubmitQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
-                                                                           HttpServletRequest request) {
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest) {
 
         // todo 额外进行权限校验（用户只能访问自己创建的数据，如果是管理员可以访问所有数据）
 
@@ -159,12 +157,10 @@ public class QuestionSubmitController {
      * 分页获取列表（自定义SQL处理）
      *
      * @param questionSubmitQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitVOByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitVOByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest) {
         // 获取分页信息
         return ResultUtils.success(questionSubmitService.getVOByPage(questionSubmitQueryRequest));
     }
@@ -177,12 +173,11 @@ public class QuestionSubmitController {
      * 批量删除问题提交
      *
      * @param batchDeleteRequest
-     * @param request
      * @return
      */
     @PostMapping("/batchDeleteQuestionSubmit")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> batchDeleteQuestionSubmit(@RequestBody BatchDeleteRequest batchDeleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> batchDeleteQuestionSubmit(@RequestBody BatchDeleteRequest batchDeleteRequest) {
         if (batchDeleteRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

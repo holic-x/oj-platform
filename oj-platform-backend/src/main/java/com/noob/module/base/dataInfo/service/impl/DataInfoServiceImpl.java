@@ -9,20 +9,19 @@ import com.noob.framework.constant.CommonConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
 import com.noob.framework.utils.SqlUtils;
+import com.noob.module.base.dataInfo.mapper.DataInfoMapper;
 import com.noob.module.base.dataInfo.model.dto.DataInfoQueryRequest;
+import com.noob.module.base.dataInfo.model.entity.DataInfo;
 import com.noob.module.base.dataInfo.model.vo.DataInfoVO;
+import com.noob.module.base.dataInfo.service.DataInfoService;
 import com.noob.module.base.user.model.entity.User;
 import com.noob.module.base.user.model.vo.UserVO;
 import com.noob.module.base.user.service.UserService;
-import com.noob.module.base.dataInfo.model.entity.DataInfo;
-import com.noob.module.base.dataInfo.service.DataInfoService;
-import com.noob.module.base.dataInfo.mapper.DataInfoMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -99,7 +98,7 @@ public class DataInfoServiceImpl extends ServiceImpl<DataInfoMapper, DataInfo>
     }
 
     @Override
-    public DataInfoVO getDataInfoVO(DataInfo dataInfo, HttpServletRequest request) {
+    public DataInfoVO getDataInfoVO(DataInfo dataInfo) {
 
         DataInfoVO dataInfoVO = DataInfoVO.objToVo(dataInfo);
         // 1. 关联查询创建者、修改者信息
@@ -121,7 +120,7 @@ public class DataInfoServiceImpl extends ServiceImpl<DataInfoMapper, DataInfo>
     }
 
     @Override
-    public Page<DataInfoVO> getDataInfoVOPage(Page<DataInfo> dataInfoPage, HttpServletRequest request) {
+    public Page<DataInfoVO> getDataInfoVOPage(Page<DataInfo> dataInfoPage) {
         List<DataInfo> dataInfoList = dataInfoPage.getRecords();
         Page<DataInfoVO> dataInfoVOPage = new Page<>(dataInfoPage.getCurrent(), dataInfoPage.getSize(), dataInfoPage.getTotal());
         if (CollUtil.isEmpty(dataInfoList)) {

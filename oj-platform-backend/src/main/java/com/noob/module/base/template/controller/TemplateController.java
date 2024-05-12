@@ -7,6 +7,7 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.template.constant.TemplateConstant;
 import com.noob.module.base.template.model.dto.TemplateAddRequest;
 import com.noob.module.base.template.model.dto.TemplateQueryRequest;
@@ -48,7 +49,7 @@ public class TemplateController {
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Long> addTemplate(@RequestBody TemplateAddRequest templateAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addTemplate(@RequestBody TemplateAddRequest templateAddRequest) {
         if (templateAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -59,7 +60,7 @@ public class TemplateController {
         template.setStatus(TemplateConstant.TEMPLATE_STATUS_DRAFT);
         templateService.validTemplate(template, true);
 
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser();
         template.setCreater(loginUser.getId());
         template.setUpdater(loginUser.getId());
         template.setCreateTime(new Date());
@@ -80,17 +81,17 @@ public class TemplateController {
      * @return
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteTemplate(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteTemplate(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userService.getLoginUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         Template oldTemplate = templateService.getById(id);
         ThrowUtils.throwIf(oldTemplate == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldTemplate.getCreater().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldTemplate.getCreater().equals(user.getId()) && !ShiroUtil.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = templateService.removeById(id);

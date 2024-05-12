@@ -2,13 +2,11 @@ package com.noob.framework.aop;
 
 import com.noob.framework.annotation.AuthCheck;
 import com.noob.framework.common.ErrorCode;
-import com.noob.module.base.user.model.enums.UserRoleEnum;
-import com.noob.module.base.user.service.UserService;
 import com.noob.framework.exception.BusinessException;
-import com.noob.module.base.user.model.entity.User;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import com.noob.framework.realm.ShiroUtil;
+import com.noob.module.base.user.model.enums.UserRoleEnum;
+import com.noob.module.base.user.model.vo.LoginUserVO;
+import com.noob.module.base.user.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -18,12 +16,16 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 权限校验 AOP
  *
  */
 @Aspect
 @Component
+@Deprecated
 public class AuthInterceptor {
 
     @Resource
@@ -41,14 +43,14 @@ public class AuthInterceptor {
         RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
         HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
         // 当前登录用户
-        User loginUser = userService.getLoginUser(request);
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
         // 必须有该权限才通过
         if (StringUtils.isNotBlank(mustRole)) {
             UserRoleEnum mustUserRoleEnum = UserRoleEnum.getEnumByValue(mustRole);
             if (mustUserRoleEnum == null) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
             }
-            String userRole = loginUser.getUserRole();
+            String userRole = currentUser.getUserRole();
             // 如果被封号，直接拒绝
             if (UserRoleEnum.BAN.equals(mustUserRoleEnum)) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

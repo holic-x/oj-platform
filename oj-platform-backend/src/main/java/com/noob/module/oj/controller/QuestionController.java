@@ -11,7 +11,6 @@ import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
 import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.user.model.entity.User;
-import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.service.UserService;
 import com.noob.module.oj.model.question.dto.*;
 import com.noob.module.oj.model.question.entity.Question;
@@ -27,7 +26,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,19 +53,18 @@ public class QuestionController {
     /**
      * 创建
      * @param questionAddRequest
-     * @param request
      * @return
      */
     @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/add")
-    public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addQuestion(@RequestBody QuestionAddRequest questionAddRequest) {
         if (questionAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         Question question = new Question();
         BeanUtils.copyProperties(questionAddRequest, question);
 
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser();
         question.setUserId(loginUser.getId());
         question.setCreateTime(new Date());
 
@@ -107,23 +104,22 @@ public class QuestionController {
      * 删除
      *
      * @param deleteRequest
-     * @param request
      * @return
      */
     @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteQuestion(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userService.getLoginUser();
 //        LoginUserVO loginUserVO = ShiroUtil.getCurrentUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         Question oldQuestion = questionService.getById(id);
         ThrowUtils.throwIf(oldQuestion == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldQuestion.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldQuestion.getUserId().equals(user.getId()) && !ShiroUtil.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = questionService.removeById(id);
@@ -190,7 +186,7 @@ public class QuestionController {
      * @return
      */
     @GetMapping("/get")
-    public BaseResponse<Question> getQuestionById(long id, HttpServletRequest request) {
+    public BaseResponse<Question> getQuestionById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -198,9 +194,9 @@ public class QuestionController {
         if (question == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser();
         // 不是本人或管理员，不能直接获取所有信息
-        if (!question.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!question.getUserId().equals(loginUser.getId()) && !ShiroUtil.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         return ResultUtils.success(question);
@@ -213,11 +209,11 @@ public class QuestionController {
      * @return
      */
     @GetMapping("/get/vo")
-    public BaseResponse<QuestionVO> getQuestionVOById(long id, HttpServletRequest request) {
+    public BaseResponse<QuestionVO> getQuestionVOById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        QuestionVO questionVO = questionService.getVOById(id,request);
+        QuestionVO questionVO = questionService.getVOById(id);
         return ResultUtils.success(questionVO);
     }
 
@@ -226,12 +222,10 @@ public class QuestionController {
      * 分页获取列表（自定义SQL处理）: 提供给管理员
      *
      * @param questionQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page")
-    public BaseResponse<Page<QuestionVO>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<QuestionVO>> listQuestionByPage(@RequestBody QuestionQueryRequest questionQueryRequest) {
         Page<QuestionVO> questionVOPage = questionService.getVOByPage(questionQueryRequest);
 
         // 处理标签数据信息
@@ -252,12 +246,10 @@ public class QuestionController {
      * 分页获取列表（自定义SQL处理）: 返回封装类（例如进行脱敏），提供给用户
      *
      * @param questionQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest,
-                                                      HttpServletRequest request) {
+    public BaseResponse<Page<QuestionVO>> listQuestionVOByPage(@RequestBody QuestionQueryRequest questionQueryRequest) {
 
         Page<QuestionVO> questionVOPage = questionService.getVOByPage(questionQueryRequest);
 
@@ -284,13 +276,12 @@ public class QuestionController {
      * 批量删除问题
      *
      * @param batchDeleteRequest
-     * @param request
      * @return
      */
     @RequiresRoles(UserConstant.ADMIN_ROLE)
     @PostMapping("/batchDeleteQuestion")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> batchDeleteQuestion(@RequestBody BatchDeleteRequest batchDeleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> batchDeleteQuestion(@RequestBody BatchDeleteRequest batchDeleteRequest) {
         if (batchDeleteRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -312,17 +303,15 @@ public class QuestionController {
      * 提交题目
      *
      * @param questionSubmitAddRequest
-     * @param request
      * @return 提交记录的 id
      */
     @PostMapping("/question_submit/do")
-    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest,
-                                               HttpServletRequest request) {
+    public BaseResponse<Long> doQuestionSubmit(@RequestBody QuestionSubmitAddRequest questionSubmitAddRequest) {
         if (questionSubmitAddRequest == null || questionSubmitAddRequest.getQuestionId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 获取登录用户
-        final User loginUser = userService.getLoginUser(request);
+        final User loginUser = userService.getLoginUser();
         long questionSubmitId = questionSubmitService.doQuestionSubmit(questionSubmitAddRequest, loginUser);
         return ResultUtils.success(questionSubmitId);
     }
@@ -331,12 +320,10 @@ public class QuestionController {
      * 分页获取题目提交列表（除了管理员外，普通用户只能看到非答案、提交代码等公开信息）
      *
      * @param questionSubmitQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/question_submit/list/page")
-    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest,
-                                                                         HttpServletRequest request) {
+    public BaseResponse<Page<QuestionSubmitVO>> listQuestionSubmitByPage(@RequestBody QuestionSubmitQueryRequest questionSubmitQueryRequest) {
         /*
         long current = questionSubmitQueryRequest.getCurrent();
         long size = questionSubmitQueryRequest.getPageSize();

@@ -2,12 +2,10 @@ package com.noob.module.base.dataInfo.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.noob.module.base.dataInfo.model.dto.DataInfoQueryRequest;
 import com.noob.module.base.dataInfo.model.entity.DataInfo;
 import com.noob.module.base.dataInfo.model.vo.DataInfoVO;
-import com.baomidou.mybatisplus.extension.service.IService;
-
-import javax.servlet.http.HttpServletRequest;
 
 /**
 * @author HUAWEI
@@ -36,19 +34,17 @@ public interface DataInfoService extends IService<DataInfo> {
      * 获取封装
      *
      * @param dataInfo
-     * @param request
      * @return
      */
-    DataInfoVO getDataInfoVO(DataInfo dataInfo, HttpServletRequest request);
+    DataInfoVO getDataInfoVO(DataInfo dataInfo);
 
     /**
      * 分页获取数据封装
      *
      * @param dataInfoPage
-     * @param request
      * @return
      */
-    Page<DataInfoVO> getDataInfoVOPage(Page<DataInfo> dataInfoPage, HttpServletRequest request);
+    Page<DataInfoVO> getDataInfoVOPage(Page<DataInfo> dataInfoPage);
 
 
     /**

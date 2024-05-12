@@ -5,18 +5,13 @@ import com.noob.framework.common.BaseResponse;
 import com.noob.framework.common.ErrorCode;
 import com.noob.framework.common.ResultUtils;
 import com.noob.framework.constant.FileConstant;
+import com.noob.framework.exception.BusinessException;
 import com.noob.framework.manager.CosManager;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.user.model.dto.file.UploadFileRequest;
 import com.noob.module.base.user.model.enums.FileUploadBizEnum;
+import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.service.UserService;
-import com.noob.framework.exception.BusinessException;
-import com.noob.module.base.user.model.entity.User;
-
-import java.io.File;
-import java.util.Arrays;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.Arrays;
 
 /**
  * 文件接口
@@ -57,11 +57,11 @@ public class FileController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         validFile(multipartFile, fileUploadBizEnum);
-        User loginUser = userService.getLoginUser(request);
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
         // 文件目录：根据业务、用户来划分
         String uuid = RandomStringUtils.randomAlphanumeric(8);
         String filename = uuid + "-" + multipartFile.getOriginalFilename();
-        String filepath = String.format("/%s/%s/%s", fileUploadBizEnum.getValue(), loginUser.getId(), filename);
+        String filepath = String.format("/%s/%s/%s", fileUploadBizEnum.getValue(), currentUser.getId(), filename);
         File file = null;
         try {
             // 上传文件

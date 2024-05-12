@@ -7,8 +7,7 @@ import com.noob.framework.common.*;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
-import com.noob.module.base.user.model.entity.User;
-import com.noob.module.base.user.service.UserService;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.dataInfo.constant.DataInfoConstant;
 import com.noob.module.base.dataInfo.model.dto.DataInfoAddRequest;
 import com.noob.module.base.dataInfo.model.dto.DataInfoQueryRequest;
@@ -17,12 +16,13 @@ import com.noob.module.base.dataInfo.model.dto.DataInfoUpdateRequest;
 import com.noob.module.base.dataInfo.model.entity.DataInfo;
 import com.noob.module.base.dataInfo.model.vo.DataInfoVO;
 import com.noob.module.base.dataInfo.service.DataInfoService;
+import com.noob.module.base.user.model.entity.User;
+import com.noob.module.base.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.List;
 
@@ -44,11 +44,10 @@ public class DataInfoController {
     /**
      * 创建
      * @param dataInfoAddRequest
-     * @param request
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Long> addDataInfo(@RequestBody DataInfoAddRequest dataInfoAddRequest, HttpServletRequest request) {
+    public BaseResponse<Long> addDataInfo(@RequestBody DataInfoAddRequest dataInfoAddRequest) {
         if (dataInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -59,7 +58,7 @@ public class DataInfoController {
         dataInfo.setStatus(DataInfoConstant.TEMPLATE_STATUS_DRAFT);
         dataInfoService.validDataInfo(dataInfo, true);
 
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userService.getLoginUser();
         dataInfo.setCreater(loginUser.getId());
         dataInfo.setUpdater(loginUser.getId());
         dataInfo.setCreateTime(new Date());
@@ -76,21 +75,20 @@ public class DataInfoController {
      * 删除
      *
      * @param deleteRequest
-     * @param request
      * @return
      */
     @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteDataInfo(@RequestBody DeleteRequest deleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> deleteDataInfo(@RequestBody DeleteRequest deleteRequest) {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User user = userService.getLoginUser(request);
+        User user = userService.getLoginUser();
         long id = deleteRequest.getId();
         // 判断是否存在
         DataInfo oldDataInfo = dataInfoService.getById(id);
         ThrowUtils.throwIf(oldDataInfo == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除
-        if (!oldDataInfo.getCreater().equals(user.getId()) && !userService.isAdmin(request)) {
+        if (!oldDataInfo.getCreater().equals(user.getId()) && !ShiroUtil.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         boolean b = dataInfoService.removeById(id);
@@ -130,7 +128,7 @@ public class DataInfoController {
      * @return
      */
     @GetMapping("/get/vo")
-    public BaseResponse<DataInfoVO> getDataInfoVOById(long id, HttpServletRequest request) {
+    public BaseResponse<DataInfoVO> getDataInfoVOById(long id) {
         if (id <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -138,7 +136,7 @@ public class DataInfoController {
         if (dataInfo == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
-        return ResultUtils.success(dataInfoService.getDataInfoVO(dataInfo, request));
+        return ResultUtils.success(dataInfoService.getDataInfoVO(dataInfo));
     }
 
     /**
@@ -161,19 +159,17 @@ public class DataInfoController {
      * 分页获取列表（封装类）
      *
      * @param dataInfoQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/list/page/vo")
-    public BaseResponse<Page<DataInfoVO>> listDataInfoVOByPage(@RequestBody DataInfoQueryRequest dataInfoQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<DataInfoVO>> listDataInfoVOByPage(@RequestBody DataInfoQueryRequest dataInfoQueryRequest) {
         long current = dataInfoQueryRequest.getCurrent();
         long size = dataInfoQueryRequest.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<DataInfo> dataInfoPage = dataInfoService.page(new Page<>(current, size),
                 dataInfoService.getQueryWrapper(dataInfoQueryRequest));
-        return ResultUtils.success(dataInfoService.getDataInfoVOPage(dataInfoPage, request));
+        return ResultUtils.success(dataInfoService.getDataInfoVOPage(dataInfoPage));
     }
 
 
@@ -182,12 +178,10 @@ public class DataInfoController {
      * 分页获取列表（自定义SQL处理）
      *
      * @param dataInfoQueryRequest
-     * @param request
      * @return
      */
     @PostMapping("/listByPage")
-    public BaseResponse<Page<DataInfoVO>> listByPage(@RequestBody DataInfoQueryRequest dataInfoQueryRequest,
-                                                               HttpServletRequest request) {
+    public BaseResponse<Page<DataInfoVO>> listByPage(@RequestBody DataInfoQueryRequest dataInfoQueryRequest) {
         // 获取分页信息
         return ResultUtils.success(dataInfoService.getVOByPage(dataInfoQueryRequest));
     }
@@ -203,8 +197,7 @@ public class DataInfoController {
      * @return
      */
     @PostMapping("/handleDataInfoStatus")
-    public BaseResponse<Boolean> handleDataInfoStatus(@RequestBody DataInfoStatusUpdateRequest dataInfoStatusUpdateRequest,
-                                                      HttpServletRequest request) {
+    public BaseResponse<Boolean> handleDataInfoStatus(@RequestBody DataInfoStatusUpdateRequest dataInfoStatusUpdateRequest) {
         if (dataInfoStatusUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -243,12 +236,11 @@ public class DataInfoController {
      * 批量删除数据
      *
      * @param batchDeleteRequest
-     * @param request
      * @return
      */
     @PostMapping("/batchDeleteDataInfo")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public BaseResponse<Boolean> batchDeleteDataInfo(@RequestBody BatchDeleteRequest batchDeleteRequest, HttpServletRequest request) {
+    public BaseResponse<Boolean> batchDeleteDataInfo(@RequestBody BatchDeleteRequest batchDeleteRequest) {
         if (batchDeleteRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }

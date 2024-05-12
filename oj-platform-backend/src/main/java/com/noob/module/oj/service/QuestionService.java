@@ -6,8 +6,6 @@ import com.noob.module.oj.model.question.dto.QuestionQueryRequest;
 import com.noob.module.oj.model.question.entity.Question;
 import com.noob.module.oj.model.question.vo.QuestionVO;
 
-import javax.servlet.http.HttpServletRequest;
-
 /**
 * @author HUAWEI
 * @description 针对表【question(题目)】的数据库操作Service
@@ -27,10 +25,9 @@ public interface QuestionService extends IService<Question> {
      * 获取封装
      *
      * @param id
-     * @param request
      * @return
      */
-    QuestionVO getVOById(long id, HttpServletRequest request);
+    QuestionVO getVOById(long id);
 
     /**
      * 分页获取数据封装(SQL处理)

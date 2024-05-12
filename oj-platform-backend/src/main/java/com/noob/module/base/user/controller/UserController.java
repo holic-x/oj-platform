@@ -7,17 +7,14 @@ import com.noob.framework.config.WxOpenConfig;
 import com.noob.framework.constant.UserConstant;
 import com.noob.framework.exception.BusinessException;
 import com.noob.framework.exception.ThrowUtils;
+import com.noob.framework.realm.ShiroUtil;
 import com.noob.module.base.user.model.dto.user.*;
 import com.noob.module.base.user.model.entity.User;
 import com.noob.module.base.user.model.vo.LoginUserVO;
 import com.noob.module.base.user.model.vo.UserVO;
-import com.noob.module.base.user.service.AccountService;
 import com.noob.module.base.user.service.UserService;
 import com.noob.module.base.user.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.subject.Subject;
@@ -27,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.List;
 
@@ -42,9 +38,6 @@ public class UserController {
 
     @Resource
     private UserService userService;
-
-    @Resource
-    private AccountService accountService;
 
     @Resource
     private WxOpenConfig wxOpenConfig;
@@ -85,18 +78,6 @@ public class UserController {
      */
     @PostMapping("/login")
     public BaseResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest request) {
-        /*
-        if (userLoginRequest == null) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        String userAccount = userLoginRequest.getUserAccount();
-        String userPassword = userLoginRequest.getUserPassword();
-        if (StringUtils.isAnyBlank(userAccount, userPassword)) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
-        return ResultUtils.success(loginUserVO);
-         */
         if (userLoginRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -106,33 +87,10 @@ public class UserController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 调用登陆验证方法（经Shiro机制处理）
-        LoginUserVO loginUserVO = accountService.userLogin(userAccount, userPassword, request);
+        LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request);
 
         // 返回登陆成功的用户信息
         return ResultUtils.success(loginUserVO);
-    }
-
-    /**
-     * 用户登录（微信开放平台）
-     */
-    @GetMapping("/login/wx_open")
-    public BaseResponse<LoginUserVO> userLoginByWxOpen(HttpServletRequest request, HttpServletResponse response,
-            @RequestParam("code") String code) {
-        WxOAuth2AccessToken accessToken;
-        try {
-            WxMpService wxService = wxOpenConfig.getWxMpService();
-            accessToken = wxService.getOAuth2Service().getAccessToken(code);
-            WxOAuth2UserInfo userInfo = wxService.getOAuth2Service().getUserInfo(accessToken, code);
-            String unionId = userInfo.getUnionId();
-            String mpOpenId = userInfo.getOpenid();
-            if (StringUtils.isAnyBlank(unionId, mpOpenId)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-            }
-            return ResultUtils.success(userService.userLoginByMpOpen(userInfo, request));
-        } catch (Exception e) {
-            log.error("userLoginByWxOpen error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-        }
     }
 
     /**
@@ -151,7 +109,7 @@ public class UserController {
         return ResultUtils.success(result);
          */
         // 调用登陆退出方法
-        accountService.userLogout();
+        userService.userLogout();
         return ResultUtils.success(true);
     }
 
@@ -163,10 +121,6 @@ public class UserController {
      */
     @GetMapping("/get/login")
     public BaseResponse<LoginUserVO> getLoginUser(HttpServletRequest request) {
-        /*
-        User user = userService.getLoginUser(request);
-        return ResultUtils.success(userService.getLoginUserVO(user));
-         */
         // 获取当前登陆用户信息（基于shiro获取）
         Subject subject = SecurityUtils.getSubject();
         LoginUserVO currentUser = (LoginUserVO) subject.getPrincipal();
@@ -224,8 +178,8 @@ public class UserController {
         }
 
         // 校验用户操作更新对象是否为本人账号（一定程度上限制其更新操作，额外提供接口更新自己的信息）
-        User loginUser = userService.getLoginUser(request);
-        if(loginUser.getId().equals(deleteRequest.getId())) {
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
+        if(currentUser.getId().equals(deleteRequest.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"不允许用户更改自己的信息");
         }
 
@@ -250,8 +204,8 @@ public class UserController {
         }
 
         // 校验用户操作更新对象是否为本人账号（一定程度上限制其更新操作，额外提供接口更新自己的信息）
-        User loginUser = userService.getLoginUser(request);
-        if(loginUser.getId().equals(userUpdateRequest.getId())) {
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
+        if(currentUser.getId().equals(userUpdateRequest.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"不允许用户更改自己的信息");
         }
 
@@ -353,10 +307,10 @@ public class UserController {
         if (userUpdateMyRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
         User user = new User();
         BeanUtils.copyProperties(userUpdateMyRequest, user);
-        user.setId(loginUser.getId());
+        user.setId(currentUser.getId());
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
         return ResultUtils.success(true);
@@ -379,8 +333,8 @@ public class UserController {
         }
 
         // 校验用户操作更新对象是否为本人账号（一定程度上限制其更新操作，额外提供接口更新自己的信息）
-        User loginUser = userService.getLoginUser(request);
-        if(loginUser.getId().equals(userStatusUpdateRequest.getId())) {
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
+        if(currentUser.getId().equals(userStatusUpdateRequest.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"不允许用户更改自己的信息");
         }
 
@@ -437,8 +391,8 @@ public class UserController {
         }
 
         // 校验用户操作更新对象是否为本人账号（一定程度上限制其更新操作，额外提供接口更新自己的信息）
-        User loginUser = userService.getLoginUser(request);
-        if(batchDeleteRequest.getIdList().contains(loginUser.getId())) {
+        LoginUserVO currentUser = ShiroUtil.getCurrentUser();
+        if(batchDeleteRequest.getIdList().contains(currentUser.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"不允许用户更改自己的信息");
         }
 

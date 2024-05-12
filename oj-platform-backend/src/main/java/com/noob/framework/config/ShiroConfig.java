@@ -62,11 +62,13 @@ public class ShiroConfig {
          */
         map.put("/html/home.html", "authc");
 
-        // 不需要认证就能访问（可配置静态资源或接口访问）
+        // todo 设定不需要认证就能访问（可配置静态资源或接口访问）
         map.put("/login.html", "anon");
 
-        map.put("/account/login", "anon");
-        map.put("/account/logout", "anon");
+        // todo 设定放行接口（不需要认证即可访问的接口设定）
+        map.put("/user/login", "anon");
+        map.put("/user/register", "anon");
+        map.put("/user/logout", "anon");
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(map);
 

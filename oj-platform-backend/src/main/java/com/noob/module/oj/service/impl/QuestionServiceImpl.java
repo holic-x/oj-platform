@@ -15,7 +15,6 @@ import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author HUAWEI
@@ -50,7 +49,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     }
 
     @Override
-    public QuestionVO getVOById(long id, HttpServletRequest request) {
+    public QuestionVO getVOById(long id) {
         return questionMapper.getVOById(id);
     }
 
