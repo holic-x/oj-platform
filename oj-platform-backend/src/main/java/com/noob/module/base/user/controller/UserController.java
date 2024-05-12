@@ -62,14 +62,17 @@ public class UserController {
         if (userRegisterRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        String userName = userRegisterRequest.getUserName();
+//        String userName = userRegisterRequest.getUserName();
         String userAccount = userRegisterRequest.getUserAccount();
         String userPassword = userRegisterRequest.getUserPassword();
         String checkPassword = userRegisterRequest.getCheckPassword();
-        if (StringUtils.isAnyBlank(userName,userAccount, userPassword, checkPassword)) {
-            return null;
+//        if (StringUtils.isAnyBlank(userName,userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+            // 参数校验不能为空
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请确认输入的注册信息");
         }
-        long result = userService.userRegister(userName,userAccount, userPassword, checkPassword);
+        // todo 用户名userName设置（初步设定和账号一致）
+        long result = userService.userRegister(userAccount,userAccount, userPassword, checkPassword);
         return ResultUtils.success(result);
     }
 

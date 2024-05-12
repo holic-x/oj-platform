@@ -59,6 +59,13 @@
             <version>3.3.0</version>
         </dependency>
 
+        <!-- 引入swagger2+knife4j -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi2-spring-boot-starter</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
     </dependencies>
     <dependencyManagement>
         <dependencies>

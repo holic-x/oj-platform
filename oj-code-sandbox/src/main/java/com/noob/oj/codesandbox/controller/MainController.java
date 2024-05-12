@@ -1,7 +1,9 @@
 package com.noob.oj.codesandbox.controller;
 
 import com.noob.framework.common.BaseResponse;
+import com.noob.framework.common.ErrorCode;
 import com.noob.framework.common.ResultUtils;
+import com.noob.framework.exception.BusinessException;
 import com.noob.oj.codesandbox.JavaNativeCodeSandbox;
 import com.noob.oj.codesandbox.model.ExecuteCodeRequest;
 import com.noob.oj.codesandbox.model.ExecuteCodeResponse;
@@ -48,7 +50,9 @@ public class MainController {
         String authHeader = request.getHeader(AUTH_REQUEST_HEADER);
         if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
             response.setStatus(403);
-            return null;
+            // 鉴权失败
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"鉴权失败，请确认后再次尝试");
+//            return null;
         }
 
         if (executeCodeRequest == null) {
@@ -70,12 +74,14 @@ public class MainController {
         String authHeader = request.getHeader(AUTH_REQUEST_HEADER);
         if (!AUTH_REQUEST_SECRET.equals(authHeader)) {
             response.setStatus(403);
-            return null;
+            // 鉴权失败
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR,"鉴权失败，请确认后再次尝试");
         }
 
         if (executeCodeRequest == null) {
             throw new RuntimeException("请求参数为空");
         }
+        // 封装一层响应信息
         return ResultUtils.success(javaNativeCodeSandbox.executeCode(executeCodeRequest));
     }
 }

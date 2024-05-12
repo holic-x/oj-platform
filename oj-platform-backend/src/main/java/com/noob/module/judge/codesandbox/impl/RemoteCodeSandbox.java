@@ -48,8 +48,8 @@ public class RemoteCodeSandbox implements CodeSandbox {
         if (StringUtils.isBlank(responseStr)) {
             throw new BusinessException(ErrorCode.API_REQUEST_ERROR, "executeCode remoteSandbox error, message = " + responseStr);
         }
-//        return JSONUtil.toBean(responseStr, ExecuteCodeResponse.class);
 
+        // 返回沙箱响应信息
 //        return JSONUtil.toBean(responseStr, ExecuteCodeResponse.class);
 
         BaseResponse response = JSONUtil.toBean(responseStr, BaseResponse.class);
@@ -63,7 +63,6 @@ public class RemoteCodeSandbox implements CodeSandbox {
 
 //        System.out.println("远程代码沙箱");
 //        return null;
-
 
     }
 }

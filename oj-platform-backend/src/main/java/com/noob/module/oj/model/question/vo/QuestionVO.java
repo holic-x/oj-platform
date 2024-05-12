@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 问题视图
@@ -32,7 +33,8 @@ public class QuestionVO implements Serializable {
     /**
      * 标签列表（json 数组）
      */
-    private String tags;
+//    private String tags;
+    private List<String> tags;
 
     /**
      * 题目答案

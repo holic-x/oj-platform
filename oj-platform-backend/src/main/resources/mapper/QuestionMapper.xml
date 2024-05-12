@@ -28,7 +28,8 @@
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
-        <result property="tags" column="tags" jdbcType="VARCHAR"/>
+<!--        <result property="tags" column="tags" typeHandler="VARCHAR"/>-->
+        <result property="tags" column="tags" typeHandler="com.noob.framework.typehandler.ListTypeHandler"/>
         <result property="answer" column="answer" jdbcType="VARCHAR"/>
         <result property="submitNum" column="submitNum" jdbcType="INTEGER"/>
         <result property="acceptedNum" column="acceptedNum" jdbcType="INTEGER"/>
@@ -79,5 +80,28 @@
         <if test="params.content !=null and params.content !=''">
             and q.content like concat('%',#{content},'%')
         </if>
+
+
+<!--        <if test="params.tags !=null and params.tags.size > 0 ">-->
+<!--            AND q.tags like #{params.tags}-->
+<!--        </if>-->
+
+        <if test="params.tags !=null and params.tags.size > 0 ">
+            <foreach item="item" index="index" collection="params.tags">
+                and q.tags like concat('%',#{item},'%')
+            </foreach>
+        </if>
+
+<!--        -->
+<!--        <if test="params.tags !=null and params.tags.size > 0 ">-->
+<!--            AND q.tags in-->
+<!--            <foreach item="item" index="index" collection="params.tags"-->
+<!--                     open="(" separator="," close=")">-->
+<!--                 #{item}-->
+<!--            </foreach>-->
+<!--        </if>-->
+<!--        -->
+
+
     </select>
 </mapper>

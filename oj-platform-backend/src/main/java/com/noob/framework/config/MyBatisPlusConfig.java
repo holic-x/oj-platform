@@ -2,7 +2,6 @@ package com.noob.framework.config;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
-import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -26,4 +25,13 @@ public class MyBatisPlusConfig {
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
         return interceptor;
     }
+
+//    @Bean
+//    public TypeHandlerRegistry mybatisPlusTypeHandlerRegistry() {
+//        TypeHandlerRegistry registry = new TypeHandlerRegistry();
+//        // 自定义类型转换器进行注册
+//        registry.register(List.class, new ListTypeHandler());
+//        return registry;
+//    }
+
 }
